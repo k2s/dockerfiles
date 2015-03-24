@@ -80,5 +80,6 @@ RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/e
 
 # final settings
 RUN /xt/tools/_apt_proxy 0
+ENV PATH $PATH:/xt/hosting/bin
 WORKDIR /root
 CMD ["zsh"]
