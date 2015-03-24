@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+PATH_BASE=${PATH_BASE:-~/cloudtools}
+PATH_PRIVATE=${PATH_PRIVATE:-$PATH_BASE/private}
+PATH_HOSTING=${PATH_HOSTING:-$PATH_BASE/hosting}
+PATH_DOCKERS=${PATH_DOCKERS:-$PATH_BASE/dockers}
+
+# check that /var/run/docker.sock exists
+if [ ! -S /var/run/docker.sock ]; then
+    echo "error: docker server has to be running on host machine";
+    exit 1
+fi
+# that all directories exists
+if [ ! -d $PATH_PRIVATE ]; then
+    echo "error: variable \$DIR_PRIVATE has to point to existing folder: $PATH_PRIVATE";
+    exit 2
+fi
+if [ ! -d $PATH_HOSTING ]; then
+    echo "error: variable \$DIR_HOSTING has to point to existing folder: $PATH_HOSTING";
+    exit 2
+fi
+if [ ! -d $PATH_DOCKERS ]; then
+    echo "error: variable \$DIR_DOCKERS has to point to existing folder: $PATH_DOCKERS";
+    exit 2
+fi
+
+touch $PATH_PRIVATE/known_host
+
+# start docker ready to communicate with cloud
+docker run --rm --name cloudtools -ti \
+    -v $PATH_PRIVATE:/xt/private \
+    -v $PATH_HOSTING:/xt/hosting \
+    -v $PATH_DOCKERS:/xt/dockers \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v $PATH_HOSTING/.zpreztorc:/root/.zpreztorc \
+    -v $PATH_HOSTING/.zshrc:/root/.zshrc \
+    -v $PATH_PRIVATE/known_hosts:/root/.ssh/known_hosts \
+    --entrypoint /xt/hosting/manage.sh \
+    bigm/cloudtools zsh
