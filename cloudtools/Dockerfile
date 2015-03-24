@@ -13,7 +13,7 @@ COPY tools /xt/tools
 # cached apt-get
 RUN echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/02apt-speedup
 # TODO http://askubuntu.com/questions/53443/how-do-i-ignore-a-proxy-if-not-available
-RUN /xt/tools/_apt_proxy 1
+RUN /xt/tools/_apt_proxy 0
 
 # basic utilities
 RUN /xt/tools/_apt_install wget tar unzip mc less tmux nano vim telnet curl inetutils-ping
