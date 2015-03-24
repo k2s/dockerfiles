@@ -23,8 +23,13 @@ Example run command:
 
 ## Build locally
 
-The `_apt_proxy` script is forcing apt to use local apt caching proxy. So you have to start:
+    docker build -t bigm/cloudtools .
+
+If you change the first `RUN /xt/tools/_apt_proxy 0` to `RUN /xt/tools/_apt_proxy 1` it will force apt to use local apt caching proxy.
+Unfortunately `docker build` command has parameter to pass variable to Dockerfile.
+
+Then you have to start:
     
     docker run --name="apt-cache" -d -p 3142:3142 -v /var/cache/apt:/var/cache/apt-cacher-ng sameersbn/apt-cacher-ng:latest
     
-    docker build -t bigm/cloudtools .
+ 
