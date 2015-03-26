@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+PATH_BASE=${PATH_BASE:-~/devtools}
+PATH_PRIVATE=${PATH_PRIVATE:-$PATH_BASE/private}
+PATH_DEV=${PATH_DEV:-$PATH_BASE/dev}
+PATH_PRJ=${PATH_PRJ:-$PATH_BASE/prj}
+
+# check that /var/run/docker.sock exists
+if [ ! -S /var/run/docker.sock ]; then
+    echo "error: docker server has to be running on host machine";
+    exit 1
+fi
+# that all directories exists
+if [ ! -d $PATH_PRIVATE ]; then
+    echo "error: variable \$PATH_PRIVATE has to point to existing folder: $PATH_PRIVATE";
+    exit 2
+fi
+if [ ! -d $PATH_DEV ]; then
+    echo "error: variable \$PATH_DEV has to point to existing folder: $PATH_DEV";
+    exit 2
+fi
+if [ ! -d $PATH_PRJ ]; then
+    echo "error: variable \$PATH_PRJ has to point to existing folder: $PATH_PRJ";
+    exit 2
+fi
+
+touch $PATH_PRIVATE/known_host
+touch $PATH_DEV/.zpreztorc
+touch $PATH_DEV/.zshrc
+
+# start docker
+docker run --rm --name devtools -ti \
+    -v $PATH_PRIVATE:/xt/private \
+    -v $PATH_DEV:/xt/dev \
+    -v $PATH_PRJ:/prj \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v $PATH_DEV/.zpreztorc:/root/.zpreztorc \
+    -v $PATH_DEV/.zshrc:/root/.zshrc \
+    -v $PATH_PRIVATE/known_hosts:/root/.ssh/known_hosts \
+    --entrypoint /xt/dev/bin/devtools-startup.sh \
+    bigm/devtools zsh
