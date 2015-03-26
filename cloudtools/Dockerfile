@@ -82,5 +82,5 @@ RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/e
 RUN /xt/tools/_apt_proxy 0
 ENV PATH $PATH:/xt/hosting/bin
 RUN echo "set-option -g default-shell /bin/zsh" > /root/.tmux.conf
-WORKDIR /root
+WORKDIR /prj
 CMD ["zsh"]

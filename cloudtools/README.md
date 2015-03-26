@@ -6,7 +6,7 @@ This is general image which is depending on mounted volumes:
 
 * `/xt/private` - secure data, like private keys and AWS credentials, etc.
 * `/xt/hosting` - personal binaries, config files to manage cloud
-* `/xt/dockers` - repository of Dockerfiles
+* `/prj` - repository of files used to build particular cloud
 
 Default location (see run example how to change it) for this folders on your host computer is `~/cloudtools/private`, `~/cloudtools/hosting` and `~/cloudtools/dockers`. 
 You should create this folders before you start this Docker image. 

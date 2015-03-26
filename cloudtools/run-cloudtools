@@ -3,7 +3,7 @@
 PATH_BASE=${PATH_BASE:-~/cloudtools}
 PATH_PRIVATE=${PATH_PRIVATE:-$PATH_BASE/private}
 PATH_HOSTING=${PATH_HOSTING:-$PATH_BASE/hosting}
-PATH_DOCKERS=${PATH_DOCKERS:-$PATH_BASE/dockers}
+PATH_PRJ=${PATH_PRJ:-$PATH_BASE/dockers}
 
 # check that /var/run/docker.sock exists
 if [ ! -S /var/run/docker.sock ]; then
@@ -19,8 +19,8 @@ if [ ! -d $PATH_HOSTING ]; then
     echo "error: variable \$PATH_HOSTING has to point to existing folder: $PATH_HOSTING";
     exit 2
 fi
-if [ ! -d $PATH_DOCKERS ]; then
-    echo "error: variable \$PATH_DOCKERS has to point to existing folder: $PATH_DOCKERS";
+if [ ! -d $PATH_PRJ ]; then
+    echo "error: variable \$PATH_PRJ has to point to existing folder: $PATH_PRJ";
     exit 2
 fi
 
@@ -30,7 +30,7 @@ touch $PATH_PRIVATE/known_host
 docker run --rm --name cloudtools -ti \
     -v $PATH_PRIVATE:/xt/private \
     -v $PATH_HOSTING:/xt/hosting \
-    -v $PATH_DOCKERS:/xt/dockers \
+    -v $PATH_PRJ:/prj \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $PATH_HOSTING/.zpreztorc:/root/.zpreztorc \
     -v $PATH_HOSTING/.zshrc:/root/.zshrc \
