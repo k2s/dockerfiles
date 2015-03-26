@@ -12,15 +12,15 @@ if [ ! -S /var/run/docker.sock ]; then
 fi
 # that all directories exists
 if [ ! -d $PATH_PRIVATE ]; then
-    echo "error: variable \$DIR_PRIVATE has to point to existing folder: $PATH_PRIVATE";
+    echo "error: variable \$PATH_PRIVATE has to point to existing folder: $PATH_PRIVATE";
     exit 2
 fi
 if [ ! -d $PATH_HOSTING ]; then
-    echo "error: variable \$DIR_HOSTING has to point to existing folder: $PATH_HOSTING";
+    echo "error: variable \$PATH_HOSTING has to point to existing folder: $PATH_HOSTING";
     exit 2
 fi
 if [ ! -d $PATH_DOCKERS ]; then
-    echo "error: variable \$DIR_DOCKERS has to point to existing folder: $PATH_DOCKERS";
+    echo "error: variable \$PATH_DOCKERS has to point to existing folder: $PATH_DOCKERS";
     exit 2
 fi
 
