@@ -12,17 +12,16 @@ COPY tools /xt/tools
 
 # cached apt-get
 RUN echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/02apt-speedup
+RUN /xt/tools/_apt_install netcat
 # TODO http://askubuntu.com/questions/53443/how-do-i-ignore-a-proxy-if-not-available
-RUN /xt/tools/_apt_proxy 0
+ADD shared/detect-http-proxy /etc/apt/detect-http-proxy
+ADD shared/30detectproxy etc/apt/apt.conf.d/30detectproxy
 
 # basic utilities
 RUN /xt/tools/_apt_install wget tar unzip mc less tmux nano vim telnet curl inetutils-ping
 
 # git
 RUN /xt/tools/_apt_install git-flow
-
-#RUN /xt/tools/_apt_install fizsh \
-#    && chsh -s /bin/fizsh
 
 # interact with S3 bucket
 RUN /xt/tools/_apt_install s3cmd
@@ -78,8 +77,10 @@ RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/e
   rm -rf /tmp/etcd-v${VERSION_ETCD}-linux-amd64 /tmp/etcd-v${VERSION_ETCD}-linux-amd64.tar.gz
 #ENV ETCDCTL_PEERS 10.1.42.1:4001
 
+# some dev tools for future scripts
+RUN /xt/tools/_apt_install dialog
+
 # final settings
-RUN /xt/tools/_apt_proxy 0
 ENV PATH $PATH:/xt/hosting/bin
 RUN echo "set-option -g default-shell /bin/zsh" > /root/.tmux.conf
 WORKDIR /prj
