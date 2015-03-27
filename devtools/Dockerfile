@@ -12,8 +12,11 @@ COPY tools /xt/tools
 
 # cached apt-get
 RUN echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/02apt-speedup
-# TODO http://askubuntu.com/questions/53443/how-do-i-ignore-a-proxy-if-not-available
-RUN /xt/tools/_apt_proxy 0
+RUN /xt/tools/_apt_install netcat
+# http://askubuntu.com/questions/53443/how-do-i-ignore-a-proxy-if-not-available
+# docker run --name="apt-cache" -d -p 3142:3142 -v /var/cache/apt:/var/cache/apt-cacher-ng sameersbn/apt-cacher-ng:latest
+ADD shared/detect-http-proxy /etc/apt/detect-http-proxy
+ADD shared/30detectproxy etc/apt/apt.conf.d/30detectproxy
 
 # basic utilities
 RUN /xt/tools/_apt_install wget tar unzip mc less tmux nano vim telnet curl inetutils-ping
@@ -58,5 +61,6 @@ RUN gem install sass compass zen-grids sassy-buttons
 RUN /xt/tools/_apt_proxy 0
 ENV PATH $PATH:/xt/dev/bin
 RUN echo "set-option -g default-shell /bin/zsh" > /root/.tmux.conf
+RUN echo "export TERM=xterm-color" >> /root/.bashrc
 WORKDIR /prj
 CMD ["zsh"]

@@ -13,7 +13,8 @@ COPY tools /xt/tools
 # cached apt-get
 RUN echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/02apt-speedup
 RUN /xt/tools/_apt_install netcat
-# TODO http://askubuntu.com/questions/53443/how-do-i-ignore-a-proxy-if-not-available
+# http://askubuntu.com/questions/53443/how-do-i-ignore-a-proxy-if-not-available
+# docker run --name="apt-cache" -d -p 3142:3142 -v /var/cache/apt:/var/cache/apt-cacher-ng sameersbn/apt-cacher-ng:latest
 ADD shared/detect-http-proxy /etc/apt/detect-http-proxy
 ADD shared/30detectproxy etc/apt/apt.conf.d/30detectproxy
 
@@ -83,5 +84,6 @@ RUN /xt/tools/_apt_install dialog
 # final settings
 ENV PATH $PATH:/xt/hosting/bin
 RUN echo "set-option -g default-shell /bin/zsh" > /root/.tmux.conf
+RUN echo "export TERM=xterm-color" >> /root/.bashrc
 WORKDIR /prj
 CMD ["zsh"]
