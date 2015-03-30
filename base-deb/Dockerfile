@@ -22,3 +22,6 @@ ADD shared/30detectproxy etc/apt/apt.conf.d/30detectproxy
 RUN apt-get update \
     && apt-get -yqq --no-install-recommends upgrade \
     && rm -rf /var/lib/apt/lists/*
+
+# some tools for /xt/tools
+RUN /xt/tools/_apt_install curl
