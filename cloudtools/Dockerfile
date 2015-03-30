@@ -79,7 +79,7 @@ RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/e
 #ENV ETCDCTL_PEERS 10.1.42.1:4001
 
 # some dev tools for future scripts
-RUN /xt/tools/_apt_install dialog
+RUN /xt/tools/_apt_install dialog autossh
 
 # final settings
 ENV PATH $PATH:/xt/hosting/bin

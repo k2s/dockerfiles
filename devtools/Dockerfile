@@ -57,6 +57,9 @@ RUN curl -sS https://getcomposer.org/installer | php \
 RUN /xt/tools/_apt_install ruby-full rubygems-integration
 RUN gem install sass compass zen-grids sassy-buttons
 
+# for better ssh tunnel creation
+RUN /xt/tools/_apt_install autossh
+
 # final settings
 RUN /xt/tools/_apt_proxy 0
 ENV PATH $PATH:/xt/dev/bin
