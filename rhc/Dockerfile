@@ -2,14 +2,10 @@
 FROM ruby:latest
 
 RUN apt-get update \
-    && apt-get -y install ruby-full rubygems git-core \
+    && apt-get -yqq --no-install-recommends install ruby-full rubygems git-core less \
     && rm -rf /var/lib/apt/lists/*
 
 RUN gem install rhc
-
-RUN apt-get update \
-    && apt-get -y install less \
-    && rm -rf /var/lib/apt/lists/*
 
 ADD run.sh /run.sh
 
