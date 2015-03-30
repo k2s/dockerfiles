@@ -1,9 +1,0 @@
-#!/bin/bash
-
-if [ "$1" -eq "0" ]; then
-    echo "disable APT proxy"
-    rm -f /etc/apt/apt.conf.d/01proxy
-else
-    echo "enable APT proxy"
-    echo 'Acquire::http::Proxy "http://172.17.42.1:3142";' > /etc/apt/apt.conf.d/01proxy
-fi
