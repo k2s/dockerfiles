@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+# Redirect stderr so everything ends up in the log file
+exec 2>&1
+
+PATH_ROOT=/prj/data/openfire
+mkdir -p $PATH_ROOT
+#chown -R openfire:openfire /data/openfire
+
+# populate default openfire configuration if it does not exist
+if [ ! -d $PATH_ROOT/etc ]; then
+  mv /etc/openfire $PATH_ROOT/etc
+fi
+#rm -rf /etc/openfire
+ln -sf /data/openfire/etc /etc/openfire
+
+if [ ! -d /data/openfire/lib ]; then
+  mv /var/lib/openfire /data/openfire/lib
+fi
+rm -rf /var/lib/openfire
+ln -sf /data/openfire/lib /var/lib/openfire
+
+echo "Starting openfire..."
+exec java \
+  -server \
+  -DopenfireHome=/usr/share/openfire \
+  -Dopenfire.lib.dir=/usr/share/openfire/lib \
+  -classpath /usr/share/openfire/lib/startup.jar \
+  -jar /usr/share/openfire/lib/startup.jar
