@@ -7,12 +7,6 @@ FROM textlab/ubuntu-essential
 
 ENV DEBIAN_FRONTEND noninteractive
 
-# Set locale to UTF-8.
-#ENV LANG C.UTF-8
-ENV LANG en_US.UTF-8
-ENV LC_ALL en_US.UTF-8
-RUN echo LANG=\"en_US.UTF-8\" > /etc/default/locale
-
 # copy out tool scripts
 COPY tools /xt/tools
 
@@ -23,6 +17,16 @@ RUN /xt/tools/_apt_install netcat apt-utils
 # docker run --name="apt-cache" -d -p 3142:3142 -v /var/cache/apt:/var/cache/apt-cacher-ng sameersbn/apt-cacher-ng:latest
 ADD shared/detect-http-proxy /etc/apt/detect-http-proxy
 ADD shared/30detectproxy etc/apt/apt.conf.d/30detectproxy
+
+# set locale to UTF-8
+#ENV LANG C.UTF-8
+RUN /xt/tools/_apt_install locales
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+RUN locale-gen en_US.UTF-8 \
+    && dpkg-reconfigure locales \
+    && echo "LC_ALL=en_US.UTF-8" > /etc/default/locale \
+    && echo "LANG=en_US.UTF-8" >> /etc/default/locale
 
 # upgrade Ubuntu
 RUN apt-get update \
