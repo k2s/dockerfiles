@@ -12,16 +12,16 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
 #= youtrack
 ENV YOUTRACK_VERSION 6.0.12634
-RUN mkdir -p /usr/local/youtrack \
-    && mkdir -p /var/lib/youtrack \
-    && /xt/tools/_download /usr/local/youtrack/youtrack-$YOUTRACK_VERSION.jar http://download.jetbrains.com/charisma/youtrack-$YOUTRACK_VERSION.jar \
-    && ln -s /usr/local/youtrack/youtrack-$YOUTRACK_VERSION.jar /usr/local/youtrack/youtrack.jar
+RUN mkdir -p /prj/bin \
+    && /xt/tools/_download /prj/bin/youtrack-$YOUTRACK_VERSION.jar http://download.jetbrains.com/charisma/youtrack-$YOUTRACK_VERSION.jar \
+    && ln -s /prj/bin/youtrack-$YOUTRACK_VERSION.jar /prj/bin/youtrack.jar
 #= .youtrack
 
-# configure
-ADD ./youtrack /xt/youtrack
-EXPOSE 8080
+# project files
+ADD ./prj /prj
 
+# configure
 ENV YOUTRACK_MAX_METASPACE 250m
 ENV YOUTRACK_TRUST_STORE_PASSWORD changeit
-CMD ["/xt/youtrack/run_youtrack"]
+CMD ["/prj/bin/run_youtrack"]
+EXPOSE 8080
