@@ -4,6 +4,7 @@
 exec 2>&1
 
 exec java \
+	-Duser.home=/prj/data \
 	-Xmx1g \
 	-XX:MaxMetaspaceSize=$YOUTRACK_MAX_METASPACE \
 	-XX:+HeapDumpOnOutOfMemoryError \
@@ -13,7 +14,6 @@ exec java \
 	-XX:+UseBiasedLocking \
 	-Djava.awt.headless=true \
 	-Xss4m \
-	-Dcatalina.base=/home/youtrack/standalone \
 	-Djetbrains.dnq.cachePercent=25 \
 	-Djetbrains.dnq.sharedCache=false \
 	-Djetbains.webr.uiQueryCancellingPolicyTimeout=80000 \
@@ -24,7 +24,6 @@ exec java \
 	-Djetbrains.mps.webr.log4jPath=/prj/etc/log4j.xml \
 	-Dorg.tanukisoftware.wrapper.WrapperSimpleApp.waitForStartMain=true \
 	-Dorg.tanukisoftware.wrapper.WrapperSimpleApp.maxStartMainWait=300 \
-	-Duser.home=/prj \
 	-Djavax.net.ssl.trustStore=$JAVA_HOME/jre/lib/security/cacerts \
 	-Djavax.net.ssl.trustStorePassword=$YOUTRACK_TRUST_STORE_PASSWORD \
 	-jar /prj/bin/youtrack.jar 8080 2>&1
