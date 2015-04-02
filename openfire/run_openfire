@@ -12,14 +12,36 @@ mkdir -p $PATH_ROOT
 if [ ! -d $PATH_ROOT/etc ]; then
   mv /etc/openfire $PATH_ROOT/etc
 fi
-#rm -rf /etc/openfire
-ln -sf /data/openfire/etc /etc/openfire
+rm -rf /etc/openfire
+ln -sf $PATH_ROOT/etc /etc/openfire
 
-if [ ! -d /data/openfire/lib ]; then
-  mv /var/lib/openfire /data/openfire/lib
+if [ ! -d $PATH_ROOT/lib ]; then
+  mv /var/lib/openfire $PATH_ROOT/lib
 fi
 rm -rf /var/lib/openfire
-ln -sf /data/openfire/lib /var/lib/openfire
+if [ -d $PATH_ROOT/lib ]; then
+  ln -sf $PATH_ROOT/lib /var/lib/openfire
+fi
+
+# /var/log/openfire
+if [ ! -d $PATH_ROOT/log ]; then
+  mv /var/log/openfire $PATH_ROOT/log
+fi
+rm -rf /var/log/openfire
+if [ -d $PATH_ROOT/lib ]; then
+  ln -sf $PATH_ROOT/log /var/log/openfire
+fi
+
+# restore
+if [ -d $PATH_ROOT/restore_this ]; then
+  echo "!!! restoring data from $PATH_ROOT/restore_this"
+  cp -f $PATH_ROOT/restore_this/openfire* $PATH_ROOT/lib/embedded-db/
+  chown root:root $PATH_ROOT/lib/embedded-db/*
+  cp -f $PATH_ROOT/restore_this/conf/* $PATH_ROOT/etc/
+  chown root:root $PATH_ROOT/etc/*
+  # make sure we don't restore it again
+  mv $PATH_ROOT/restore_this $PATH_ROOT/restore_this_DONE
+fi
 
 echo "Starting openfire..."
 exec java \
