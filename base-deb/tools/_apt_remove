@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ ! -z "$1" ]; then
+    apt-get autoremove --purge adduser $@
+fi
+
+apt-get autoremove
+apt-get clean
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
