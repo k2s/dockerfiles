@@ -43,7 +43,6 @@ RUN gem install sass compass zen-grids sassy-buttons
 RUN /xt/tools/_apt_install autossh
 
 # final settings
-RUN /xt/tools/_apt_proxy 0
 ENV PATH $PATH:/xt/dev/bin
 RUN echo "set-option -g default-shell /bin/zsh" > /root/.tmux.conf
 RUN echo "export TERM=xterm-color" >> /root/.bashrc
