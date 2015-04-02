@@ -15,14 +15,18 @@ ENV OPENFIRE_VERSION 3.9.3
 RUN /xt/tools/_apt_install adduser
 RUN /xt/tools/_download /tmp/openfire_${OPENFIRE_VERSION}_all.deb http://www.igniterealtime.org/downloadServlet?filename=openfire/openfire_${OPENFIRE_VERSION}_all.deb \
     && dpkg -i /tmp/openfire_${OPENFIRE_VERSION}_all.deb \
-    && rm -rf /tmp/openfire_${OPENFIRE_VERSION}_all.deb \
+    && rm -rf /tmp/openfire_${OPENFIRE_VERSION}_all.deb
 #= .openfire
 
 # project files
 ADD run_openfire /prj/bin/run_openfire
 
 # configure
-#CMD ["/prj/bin/run_openfire"]
-EXPOSE 3478 3479 5222 5223 5229 7070 7443 7777 9090 9091
+# see https://community.igniterealtime.org/thread/48304
+EXPOSE 5222 5223 5224 7777
+#EXPOSE 5229 7070 7443  9090 9091
+#EXPOSE 3478 3479 # stun
 
-VOLUME ["/prj/data/openfire"]
+#VOLUME ["/prj/data/openfire"]
+
+#CMD ["/prj/bin/run_openfire"]
