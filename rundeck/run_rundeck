@@ -3,10 +3,19 @@
 # Redirect stderr so everything ends up in the log file
 exec 2>&1
 
+mkdir -p /prj/data/rundeck/projects
+if [ ! -d /prj/data/rundeck/config ]; then
+  mkdir -p /prj/data/rundeck/config
+  cp /prj/bin/server/config/* /prj/data/rundeck/config/
+fi
 
+# see http://rundeck.org/docs/administration/installation.html#installing-with-launcher
 java \
-  -Duser.home=/prj/data \
-  -XX:MaxMetaspaceSize=$RUNDECK_MAX_METASPACE \
+  -XX:MaxPermSize=256m \
   -Xmx1024m \
-  -Dserver.http.port=8080 \
-  -jar /prj/bin/rundeck.jar
+  -Dserver.hostname=$RUNDECK_HOSTNAME \
+  -Ddefault.user.password=$RUNDECK_USER_PASSWORD \
+  -Drundeck.jetty.connector.forwarded=$RUNDECK_FORWARDED \
+  -jar /prj/bin/rundeck-launcher.jar --skipinstall \
+  -c /prj/data/rundeck/config \
+  -p /prj/data/rundeck/projects

@@ -1,6 +1,6 @@
 FROM bigm/base-deb
 
-#= java
+#= oracle_jdk8
 # install Oracle Java
 RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections \
     && echo oracle-java8-installer shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections \
@@ -8,7 +8,7 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
     && rm -rf /var/cache/oracle-jdk8-installer
 # set JAVA_HOME
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
-#= .java
+#= .oracle_jdk8
 
 #= youtrack
 ENV YOUTRACK_VERSION 6.0.12634
