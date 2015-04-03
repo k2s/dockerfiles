@@ -8,6 +8,7 @@ export ORDER=(
     rhc
     youtrack
     openfire
+    rundeck
 )
 
 echo "build all docker images"
