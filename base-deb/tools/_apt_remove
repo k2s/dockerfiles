@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -z "$1" ]; then
-    apt-get autoremove --purge adduser $@
+    apt-get -y autoremove --purge $@
 fi
 
 apt-get autoremove

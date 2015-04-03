@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Redirect stderr so everything ends up in the log file
+exec 2>&1
+
+
+java \
+  -Duser.home=/prj/data \
+  -XX:MaxMetaspaceSize=$RUNDECK_MAX_METASPACE \
+  -Xmx1024m \
+  -Dserver.http.port=8080 \
+  -jar /prj/bin/rundeck.jar
