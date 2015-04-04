@@ -9,6 +9,7 @@ export ORDER=(
     youtrack
     openfire
     rundeck
+    gocd-server
 )
 
 echo "build all docker images"

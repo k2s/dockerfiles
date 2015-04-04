@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Redirect stderr so everything ends up in the log file
+exec 2>&1
+
