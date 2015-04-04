@@ -7,8 +7,8 @@ FROM textlab/ubuntu-essential
 
 ENV DEBIAN_FRONTEND noninteractive
 
-# copy out tool scripts
-COPY tools /xt/tools
+# copy tool scripts needed in this Dockerfile
+COPY tools/_apt_install /xt/tools/_apt_install
 
 # cached apt-get
 RUN echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/02apt-speedup
@@ -33,5 +33,6 @@ RUN apt-get update \
     && apt-get -yqq --no-install-recommends upgrade \
     && rm -rf /var/lib/apt/lists/*
 
-# some tools for /xt/tools
+# install all /xt/tools
 RUN /xt/tools/_apt_install curl
+COPY tools /xt/tools
