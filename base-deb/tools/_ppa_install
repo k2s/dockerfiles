@@ -1,15 +1,27 @@
 #!/bin/bash
 
 if [ ! -z "$1" ]; then
-    apt-get update -qq
-    apt-get install -yqq --no-install-recommends software-properties-common
+    if [ -f /usr/bin/add-apt-repository ]; then
+        IS_PPA_ENABLED_IMAGE=1
+    else
+        IS_PPA_ENABLED_IMAGE=0
+    fi
+
+    if [ ! $IS_PPA_ENABLED_IMAGE ]; then
+        echo "temporary installing software-properties-common"
+        apt-get update -qq
+        apt-get install -yqq --no-install-recommends software-properties-common
+    fi
     #
     add-apt-repository -y $1
     apt-get update -qq
     apt-get install -yqq --force-yes --no-install-recommends ${*:2}
     #
     add-apt-repository -r $1
-    apt-get remove --purge -y software-properties-common python-software-properties
+    if [ ! $IS_PPA_ENABLED_IMAGE ]; then
+        echo "removing temporare software-properties-common"
+        apt-get remove --purge -y software-properties-common python-software-properties
+    fi
     apt-get autoremove
     apt-get clean
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
