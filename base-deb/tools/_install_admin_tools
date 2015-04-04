@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+/xt/tools/_apt_install mc nano procps
