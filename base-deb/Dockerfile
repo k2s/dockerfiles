@@ -1,9 +1,4 @@
-# https://registry.hub.docker.com/_/centos/
-#FROM centos:7
-#FROM debian:wheezy
-#FROM ubuntu:14.04
-#FROM ubuntu-debootstrap:14.04
-FROM textlab/ubuntu-essential
+FROM bigm/base-deb-minimal:latest
 
 ENV DEBIAN_FRONTEND noninteractive
 
