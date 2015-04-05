@@ -20,11 +20,11 @@ To run apt-cache-ng on system boot create _/etc/systemd/system/apt-cache-ng.serv
     Restart=always
     ExecStartPre=/usr/bin/docker pull sameersbn/apt-cacher-ng:latest
     ExecStartPre=-/usr/bin/docker rm -f apt-cache
-    ExecStart=/usr/bin/docker run --name="apt-cache" -d -p 3142:3142 -v /var/cache/apt:/var/cache/apt-cacher-ng sameersbn/apt-cacher-ng:latest
+    ExecStart=/usr/bin/docker run --name=apt-cache -p 3142:3142 -v /var/cache/apt:/var/cache/apt-cacher-ng sameersbn/apt-cacher-ng:latest
     ExecStop=-/usr/bin/docker rm -f apt-cache
     
     [Install]
-    WantedBy=local.target   
+    WantedBy=local.target       
     
 And enable it on boot:
     
