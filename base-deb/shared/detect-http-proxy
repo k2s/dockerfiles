@@ -19,7 +19,7 @@ show_proxy_messages=1
 # delay and therefore its recommended to put the proxy which is most likely to
 # be available on the top. If no proxy is available, a direct connection will
 # be used
-try_proxies=("172.17.42.1:3142")
+try_proxies=("$XT_APT_PROXY")
 
 print_msg() {
     # \x0d clears the line so [Working] is hidden

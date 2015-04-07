@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+/xt/tools/_apt_install cron
+
+echo 'CHECK_LOSTFOUND=no' >> /etc/default/cron
+
+# Turn off apt periodic checks
+echo 'APT::Periodic::Enable "0";' > /etc/apt/apt.conf.d/00periodic
+
+rm -f /etc/cron.daily/standard
+
+# start it with supervisor
+cat <<EOF > /etc/supervisor/conf.d/cron.conf
+[program:cron]
+command = /usr/sbin/cron -f
+redirect_stderr=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+auto_start=true
+autorestart=true
+startsecs = 5
+stopwaitsecs = 3600
+stopasgroup = false
+killasgroup = true
+EOF
