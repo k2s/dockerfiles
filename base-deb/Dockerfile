@@ -41,8 +41,11 @@ RUN /xt/tools/_apt_install python-setuptools \
     && mkdir -p /etc/supervisor/conf.d \
     && mkdir -p /var/log/supervisor
 ADD shared/supervisord.conf /etc/supervisor/supervisord.conf
-CMD ["/usr/local/bin/supervisord -c /etc/supervisor/supervisord.conf"]
+CMD ["/usr/local/bin/supervisord", "-c",  "/etc/supervisor/supervisord.conf"]
 
 # install all /xt/tools
 RUN /xt/tools/_apt_install curl
 COPY tools /xt/tools
+
+# add our entrypoint
+ENTRYPOINT ["/xt/tools/entrypoint.sh"]
