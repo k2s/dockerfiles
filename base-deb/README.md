@@ -1,27 +1,28 @@
 ## Build with apt cache enabled
 
-The file _shared/detect-http-proxy_ configures apt to detect local proxy running on IP 172.17.42.1:3142.
+The file _shared/detect-http-proxy_ configures apt to detect apt-cacher-ng proxy running on 172.17.42.1:3142.
+
+Also script _tools/_download_ tries to utilize Squid3 proxy on 172.17.42.1:3128.
   
-To start apt cache server on your build machine you should start:
+To start booth proxy services on your build machine you should start:
     
-    docker pull sameersbn/apt-cacher-ng:latest
-    docker rm -f apt-cache
-    docker run --name="apt-cache" -d -p 3142:3142 -v /var/cache/apt:/var/cache/apt-cacher-ng sameersbn/apt-cacher-ng:latest
-    
-    docker run --name=squid --rm -ti -p 3129:3129 jpetazzo/squid-in-a-can bash
+    docker pull bigm/proxy-cache:latest
+    docker rm -f proxy-cache
+    docker run --name=proxy-cache -d -v /var/cache/apt:/var/cache/apt-cacher-ng /var/cache/squid3:/var/spool/squid3 -p 3142:3142 -p 3128:3128 bigm/proxy-cache    
           
-To run apt-cache-ng on system boot create _/etc/systemd/system/apt-cache-ng.service_:
+To run _proxy-cache_ image on system boot create _/etc/systemd/system/proxy-cache.service_:
    
     [Unit]
-    Description=apt-cache-ng container
+    Description=proxy-cache container
     After=docker.service
     
     [Service]
     Restart=always
-    ExecStartPre=/usr/bin/docker pull sameersbn/apt-cacher-ng:latest
-    ExecStartPre=-/usr/bin/docker rm -f apt-cache
-    ExecStart=/usr/bin/docker run --name=apt-cache -p 3142:3142 -v /var/cache/apt:/var/cache/apt-cacher-ng sameersbn/apt-cacher-ng:latest
-    ExecStop=-/usr/bin/docker rm -f apt-cache
+    ExecStartPre=/usr/bin/docker pull bigm/proxy-cache:latest
+    ExecStartPre=-/usr/bin/docker rm -f proxy-cache
+    ExecStart=/usr/bin/docker run --name=proxy-cache -v /var/cache/apt:/var/cache/apt-cacher-ng -v /var/cache/squid3:/var/spool/squid3 -p 3142:3142 -p 3128:3128 bigm/proxy-cache
+    ExecStop=-/usr/bin/docker rm -f proxy-cache
+    TimeoutStartSec=0
     
     [Install]
     WantedBy=local.target       
@@ -29,6 +30,6 @@ To run apt-cache-ng on system boot create _/etc/systemd/system/apt-cache-ng.serv
 And enable it on boot:
     
     systemctl daemon-reload
-    systemctl enable apt-cache-ng.service
+    systemctl enable proxy-cache.service
     
     
