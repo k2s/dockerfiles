@@ -69,3 +69,9 @@ RUN echo "set-option -g default-shell /bin/zsh" > /root/.tmux.conf
 RUN echo "export TERM=xterm-color" >> /root/.bashrc
 WORKDIR /prj
 CMD ["zsh"]
+
+# some more php modules
+RUN /xt/tools/_apt_install php5-apcu php5-mcrypt php5-gd php5-mysql \
+    && php5enmod mcrypt
+RUN /xt/tools/_apt_install translate-toolkit
+RUN pear install SQL_Parser-0.6.0
