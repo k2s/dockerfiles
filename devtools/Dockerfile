@@ -31,7 +31,7 @@ RUN /xt/tools/_apt_install nodejs nodejs-legacy npm
 RUN npm install --global gulp bower yo
 
 # php stuff
-RUN /xt/tools/_apt_install php5-cli php-pear pear-channels php5-dev build-essential
+RUN /xt/tools/_apt_install php5-cli php-pear pear-channels php5-dev build-essential php5-curl
 RUN curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer
 
@@ -41,6 +41,27 @@ RUN gem install sass compass zen-grids sassy-buttons sass-globbing
 
 # for better ssh tunnel creation
 RUN /xt/tools/_apt_install autossh
+
+#= oracle_jdk7
+# install Oracle Java
+RUN echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections \
+    && echo oracle-java7-installer shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections \
+    && /xt/tools/_ppa_install ppa:webupd8team/java ca-certificates oracle-java7-installer \
+    && rm -rf /var/cache/oracle-jdk7-installer
+# set JAVA_HOME
+ENV JAVA_HOME /usr/lib/jvm/java-7-oracle
+#= .oracle_jdk7
+
+#= liquibase
+RUN /xt/tools/_apt_install mysql-client libmysql-java
+RUN /xt/tools/_download /tmp/liquibase.zip http://sourceforge.net/projects/liquibase/files/Liquibase%20Core/liquibase-3.3.2-bin.zip/download \
+    && unzip -q -d /opt/liquibase /tmp/liquibase.zip \
+    && rm /tmp/liquibase.zip \
+    && ln -s /usr/share/java/mysql-connector-java.jar /opt/liquibase/lib/mysql-connector-java.jar
+#= .liquibase
+
+# fix problems with composer cache
+ENV COMPOSER_CACHE_DIR /dev/null
 
 # final settings
 ENV PATH $PATH:/xt/dev/bin
