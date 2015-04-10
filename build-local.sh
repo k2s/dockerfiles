@@ -1,22 +1,41 @@
 #!/usr/bin/env bash
 
-export ORDER=(
+ORDER=(
+    base-deb-minimal
     base-deb
-    cloudtools
+    proxy-cache
+    base-jdk7
+    base-jdk8
     devtools
-    haproxy
-    rhc
+    cloudtools
     youtrack
     openfire
-    rundeck
-    gocd-server
+    rhc
+    haproxy
 )
+
+#    rundeck
+#    gocd-server
+#    gocd-agent
+#    rundeck
+DEBUG=0
+
+if [ ! -z $1 ]; then
+    DEBUG=0
+    ORDER=$@
+fi
+
+export ORDER
 
 echo "build all docker images"
 for fld in "${ORDER[@]}"
 do
     echo "> start build of $fld"
-    docker build -t bigm/$fld $fld/ > /dev/null
+    if [ $DEBUG ]; then
+        docker build -t bigm/$fld $fld/
+    else
+        docker build -t bigm/$fld $fld/ > /dev/null
+    fi
     if [ $? -ne 0 ]; then
     	echo "!!! error in image: $fld"
     	exit
