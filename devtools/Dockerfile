@@ -75,3 +75,8 @@ RUN /xt/tools/_apt_install php5-apcu php5-mcrypt php5-gd php5-mysql \
     && php5enmod mcrypt
 RUN /xt/tools/_apt_install translate-toolkit
 RUN pear install SQL_Parser-0.6.0
+
+RUN /xt/tools/_apt_install libyaml-dev \
+    && yes "" | pecl install yaml \
+    && echo "extension=yaml.so" > /etc/php5/mods-available/yaml.ini \
+    && php5enmod yaml
