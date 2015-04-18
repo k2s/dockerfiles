@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
-source ./build-local.sh
+source ./build-local.sh $@
 
 echo "push images to Docker registry"
 
 for fld in "${ORDER[@]}"
 do
     echo "> push $fld"
-    # docker push bigm/$fld:latest
     docker tag -f bigm/$fld:latest quay.io/bigm/$fld:latest
     docker push quay.io/bigm/$fld:latest
     if [ $? -ne 0 ]; then

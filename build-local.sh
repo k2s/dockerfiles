@@ -22,6 +22,7 @@ DEBUG=0
 
 if [ ! -z $1 ]; then
     DEBUG=0
+    ORDER=()
     ORDER=$@
 fi
 
