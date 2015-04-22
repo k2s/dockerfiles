@@ -80,3 +80,7 @@ RUN /xt/tools/_apt_install libyaml-dev \
     && yes "" | pecl install yaml \
     && echo "extension=yaml.so" > /etc/php5/mods-available/yaml.ini \
     && php5enmod yaml
+
+# fix sass-globbing version
+RUN gem install sass-globbing -v 1.1.0 \
+    && gem uninstall sass-globbing -v 1.1.1
