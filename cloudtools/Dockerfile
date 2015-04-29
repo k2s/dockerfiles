@@ -64,12 +64,11 @@ RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/e
 RUN /xt/tools/_apt_install dialog autossh
 
 # PHP to run xtcloud build tool
-RUN /xt/tools/_apt_install php5-cli php-pear libyaml-dev php5-dev \
+RUN /xt/tools/_apt_install php5-cli php-pear libyaml-dev php5-dev build-essential \
     && yes "" | pecl install yaml \
     && echo "extension=yaml.so" > /etc/php5/mods-available/yaml.ini \
-    && php5enmod yaml
-
-#    && /xt/tools/_apt_remove php5-dev php-pear
+    && php5enmod yaml \
+    && /xt/tools/_apt_remove php5-dev php-pear build-essential
 
 # final settings
 ENV PATH $PATH:/xt/hosting/bin
