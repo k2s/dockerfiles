@@ -39,5 +39,5 @@ docker build -t bigm/$CONTEXT_PATH .
 if [ $? -eq 0 ]; then
     # run shell in the new container
     echo "starting bash in bigm/$CONTEXT_PATH image ..."
-    docker run --rm -ti bigm/$CONTEXT_PATH bash
+    docker run --rm -ti -P bigm/$CONTEXT_PATH bash
 fi
