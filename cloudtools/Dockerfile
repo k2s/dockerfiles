@@ -63,6 +63,14 @@ RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/e
 # some dev tools for future scripts
 RUN /xt/tools/_apt_install dialog autossh
 
+# PHP to run xtcloud build tool
+RUN /xt/tools/_apt_install php5-cli php-pear libyaml-dev php5-dev \
+    && yes "" | pecl install yaml \
+    && echo "extension=yaml.so" > /etc/php5/mods-available/yaml.ini \
+    && php5enmod yaml
+
+#    && /xt/tools/_apt_remove php5-dev php-pear
+
 # final settings
 ENV PATH $PATH:/xt/hosting/bin
 RUN echo "set-option -g default-shell /bin/zsh" > /root/.tmux.conf
