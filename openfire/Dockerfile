@@ -1,7 +1,7 @@
 FROM bigm/base-jdk8
 
 #= openfire
-ENV OPENFIRE_VERSION 3.10.0
+ENV OPENFIRE_VERSION 3.9.3
 RUN /xt/tools/_apt_install adduser \
     && /xt/tools/_download /tmp/openfire_${OPENFIRE_VERSION}_all.deb http://www.igniterealtime.org/downloadServlet?filename=openfire/openfire_${OPENFIRE_VERSION}_all.deb \
     && dpkg -i /tmp/openfire_${OPENFIRE_VERSION}_all.deb \
