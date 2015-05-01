@@ -46,6 +46,7 @@ fi
 echo "Starting openfire..."
 exec java \
   -server \
+  -Xmx${OPENFIRE_XMX}
   -DopenfireHome=/usr/share/openfire \
   -Dopenfire.lib.dir=/usr/share/openfire/lib \
   -classpath /usr/share/openfire/lib/startup.jar \

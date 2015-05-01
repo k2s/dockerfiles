@@ -1,7 +1,7 @@
 FROM bigm/base-jdk8
 
 #= openfire
-ENV OPENFIRE_VERSION 3.9.3
+ENV OPENFIRE_VERSION 3.10.0
 RUN /xt/tools/_apt_install adduser \
     && /xt/tools/_download /tmp/openfire_${OPENFIRE_VERSION}_all.deb http://www.igniterealtime.org/downloadServlet?filename=openfire/openfire_${OPENFIRE_VERSION}_all.deb \
     && dpkg -i /tmp/openfire_${OPENFIRE_VERSION}_all.deb \
@@ -22,4 +22,5 @@ EXPOSE 5222 5223 5224 7777
 #VOLUME ["/prj/data/openfire"]
 
 # TODO use base-deb supervisor mechanism
+ENV OPENFIRE_XMX 250m
 CMD ["/prj/bin/run_openfire"]
