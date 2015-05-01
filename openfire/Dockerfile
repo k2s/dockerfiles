@@ -11,7 +11,7 @@ RUN /xt/tools/_apt_install adduser \
 #= .openfire
 
 # project files
-ADD run_openfire /prj/bin/run_openfire
+ADD ./prj /prj
 
 # configure
 # see https://community.igniterealtime.org/thread/48304
