@@ -5,15 +5,16 @@ exec 2>&1
 
 exec java \
 	-Duser.home=/prj/data \
-	-Xmx1g \
+    -server \
+	-Xmx$YOUTRACK_XMX \
 	-XX:MaxMetaspaceSize=$YOUTRACK_MAX_METASPACE \
+	-Xss2m \
 	-XX:+HeapDumpOnOutOfMemoryError \
 	-XX:+UseConcMarkSweepGC \
 	-XX:+DisableExplicitGC \
 	-XX:SoftRefLRUPolicyMSPerMB=10000 \
 	-XX:+UseBiasedLocking \
 	-Djava.awt.headless=true \
-	-Xss4m \
 	-Djetbrains.dnq.cachePercent=25 \
 	-Djetbrains.dnq.sharedCache=false \
 	-Djetbains.webr.uiQueryCancellingPolicyTimeout=80000 \

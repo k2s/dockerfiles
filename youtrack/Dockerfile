@@ -13,6 +13,7 @@ ADD ./prj /prj
 # configure
 ENV YOUTRACK_MAX_METASPACE 250m
 ENV YOUTRACK_TRUST_STORE_PASSWORD changeit
+ENV YOUTRACK_XMX 1g
 #ENV YOUTRACK_DATABASE_LOCATION /prj/data 	-Ddatabase.location=$YOUTRACK_DATABASE_LOCATION
 # TODO use base-deb supervisor mechanism
 CMD ["/prj/bin/run_youtrack"]
