@@ -1,16 +1,19 @@
 global
     daemon
     log /dev/log   local0
+    #log <domain>.papertrailapp.com:<port> local0 warning
     log /dev/log   local1 notice
+    log-send-hostname
     pidfile /var/run/haproxy.pid
-    nbproc  2 #no of processes
+    stats socket /var/run/haproxy.sock mode 600 level admin
+    nbproc  1 #no of processes
     maxconn 128000
     user haproxy
     group haproxy
 
 defaults
     log    global
-    option log-health-checks
+    #option log-health-checks
     # make sure log-format is on a single line
     log-format {"type":"haproxy","timestamp":%Ts,"http_status":%ST,"http_request":"%r","remote_addr":"%ci","bytes_read":%B,"upstream_addr":"%si","backend_name":"%b","retries":%rc,"bytes_uploaded":%U,"upstream_response_time":"%Tr","upstream_connect_time":"%Tc","session_duration":"%Tt","termination_state":"%ts"}
     mode   http
@@ -22,52 +25,16 @@ defaults
     timeout connect 5000
     timeout client 50000
     timeout server 50000
-    errorfile 400 /etc/haproxy/errors/400.http
-    errorfile 403 /etc/haproxy/errors/403.http
-    errorfile 408 /etc/haproxy/errors/408.http
-    errorfile 500 /etc/haproxy/errors/500.http
-    errorfile 502 /etc/haproxy/errors/502.http
-    errorfile 503 /etc/haproxy/errors/503.http
-    errorfile 504 /etc/haproxy/errors/504.http
-
-frontend http-in
-    bind *:8080
-
-    {{range $service := ls "/services"}}
-
-    {{$key := printf "/services/%s/domain" $service}}  {{if exists $key}}
-    acl host_{{$service}} hdr(host) -i {{getv $key}}
-    {{end}}
-    {{$key := printf "/services/%s/url_reg" $service}}  {{if exists $key}}
-    acl host_{{$service}} url_reg -i {{getv $key}}
-    {{end}}
-    acl {{$service}}_health path_beg /ping
-    {{end}}
-
-    {{range $service := ls "/services"}}
-    use_backend {{$service}} if host_{{$service}}
-    use_backend {{$service}} if {{$service}}_health
-    {{end}}
-
-{{range $service := ls "/services"}}
-backend {{$service}}
-    balance leastconn
-    {{range $upstream := ls (printf "/services/%s/upstreams" $service)}}
-    server {{$upstream}} {{printf "/services/%s/upstreams/%s" $service $upstream | getv}} check
-    {{end}}
-{{end}}
-
-
-{{range $name := ls "/tcp-services"}}
-listen {{$name}}
-    mode tcp
-    bind {{printf "/tcp-services/%s/ports" $name | getv}}
-    {{range $upstream := ls (printf "/tcp-services/%s/upstreams" $name)}}
-    server {{$upstream}} {{printf "/tcp-services/%s/upstreams/%s" $name $upstream | getv}} check
-    {{end}}
-{{end}}
-
-listen MyStats
+#    errorfile 400 /etc/haproxy/errors/400.http
+#    errorfile 403 /etc/haproxy/errors/403.http
+#    errorfile 408 /etc/haproxy/errors/408.http
+#    errorfile 500 /etc/haproxy/errors/500.http
+#    errorfile 502 /etc/haproxy/errors/502.http
+#    errorfile 503 /etc/haproxy/errors/503.http
+#    errorfile 504 /etc/haproxy/errors/504.http
+{{if getenv "HAPROXY_STATS"}}
+listen stats
+    # TODO http://permalink.gmane.org/gmane.comp.web.haproxy/17348
     mode http
     bind 0.0.0.0:1000
     stats enable
@@ -75,10 +42,45 @@ listen MyStats
     stats refresh 5s
     stats show-node
     stats show-legends
-
-    # if authentication is wanted
+    {{if getenv "HAPROXY_STATS_PWD"}}
     acl auth_ok http_auth(stats-auth)
     http-request auth unless auth_ok
 
 userlist stats-auth
-    user admin insecure-password p4ss
+    user admin insecure-password {{getenv "HAPROXY_STATS_PWD"}}
+    {{end}}
+{{end}}
+
+backend nomatch
+    errorfile 503 /etc/haproxy/errors/503.http
+
+#generated backends
+{{range $backend := lsdir "/backends"}}
+backend {{$backend}} {{/* TODO should be configurable by etcd */}}
+    balance leastconn
+    option httpclose
+    option forwardfor
+    {{range $upstream := ls (printf "/backends/%s/upstreams" $backend)}}
+    server {{$upstream}} {{printf "/backends/%s/upstreams/%s" $backend $upstream | getv}} check
+    {{end}}
+{{end}}
+frontend http-in {{range gets "/domains/*"}}{{$d := json .Value}}{{$p := base .Key}}
+    # settings for domain key {{.Key}} {{if $d.backend}}{{if exists (printf "/backends/%s/enabled" $d.backend)}}
+    {{if $d.name}}acl {{$p}}_host hdr(host) -i {{$d.name}}{{end}}
+    {{if $d.port}}
+    acl {{$p}}_host dst_port {{$d.port}}
+    bind :{{$d.port}}
+    {{end}}
+    {{if and ($d.url) (ne $d.url "/")}}acl {{$p}}_host url_reg -i {{$d.url}}{{end}}
+    #acl {{$p}}_health path_beg /ping
+    use_backend {{$d.backend}} if {{$p}}_host
+    #use_backend {{$d.backend}} if {{$p}}_health
+    {{else}}
+    # ERROR: backend {{$d.backend}} not enabled in /backends
+    {{end}}
+    {{else}}
+    # ERROR: backend value missing in {{.Key}}
+    {{end}}
+    # .settings for domain {{.Key}}
+    {{end}}
+# frontend https-in
