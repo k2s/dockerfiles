@@ -16,7 +16,7 @@ ADD ./prj /prj
 # configure
 # see https://community.igniterealtime.org/thread/48304
 EXPOSE 5222 5223 5224 7777
-#EXPOSE 5229 7070 7443  9090 9091
+#EXPOSE 5229 7070 7443 9090 9091
 #EXPOSE 3478 3479 # stun
 
 #VOLUME ["/prj/data/openfire"]
