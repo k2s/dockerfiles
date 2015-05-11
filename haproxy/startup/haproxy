@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+if [ -z "$ETCD_NODE" ]
+then
+  echo "Missing ETCD_NODE env var"
+  exit -1
+fi
+
+echo "lb instance using etcd node: $ETCD_NODE"
+
+### make sure all needed keys are created
+curl -L -X PUT -d dir=true http://$ETCD_NODE/v2/keys/lb/backends
+curl -L -X PUT -d dir=true http://$ETCD_NODE/v2/keys/lb/domains

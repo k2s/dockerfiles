@@ -1,8 +1,8 @@
 [template]
-prefix = "haproxy-discover"
+prefix = "lb"
 keys = [
-  "services",
-  "tcp-services"
+  "/backends",
+  "/domains"
 ]
 
 owner = "root"
@@ -10,5 +10,5 @@ mode = "0644"
 src = "haproxy.tmpl"
 dest = "/etc/haproxy/haproxy.cfg"
 
-check_cmd = "/usr/sbin/haproxy -c -f {{ .src }} 2> /tmp/haproxy-test.out"
+check_cmd = "/usr/sbin/haproxy -c -f {{ .src }} &>/tmp/check_haproxy"
 reload_cmd = "haproxy -f /etc/haproxy/haproxy.cfg -p /var/run/haproxy.pid -D -sf $(cat /var/run/haproxy.pid)"

@@ -1,0 +1,8 @@
+[template]
+prefix = "haproxy-discover"
+src  = "crt-list.tmpl"
+dest = "/etc/haproxy/crt-list"
+keys = [
+  "/services"
+]
+reload_cmd = "haproxy -f /etc/haproxy/haproxy.cfg -p /var/run/haproxy.pid -d -D -sf $(cat /var/run/haproxy.pid)"
