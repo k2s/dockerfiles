@@ -25,13 +25,14 @@ defaults
     timeout connect 5000
     timeout client 50000
     timeout server 50000
-#    errorfile 400 /etc/haproxy/errors/400.http
-#    errorfile 403 /etc/haproxy/errors/403.http
-#    errorfile 408 /etc/haproxy/errors/408.http
-#    errorfile 500 /etc/haproxy/errors/500.http
-#    errorfile 502 /etc/haproxy/errors/502.http
-#    errorfile 503 /etc/haproxy/errors/503.http
-#    errorfile 504 /etc/haproxy/errors/504.http
+    errorfile 400 /etc/haproxy/errors/400.http
+    errorfile 403 /etc/haproxy/errors/403.http
+    errorfile 408 /etc/haproxy/errors/408.http
+    errorfile 500 /etc/haproxy/errors/500.http
+    errorfile 502 /etc/haproxy/errors/502.http
+    errorfile 503 /etc/haproxy/errors/503.http
+    errorfile 504 /etc/haproxy/errors/504.http
+    default_backend nomatch
 {{if getenv "HAPROXY_STATS"}}
 listen stats
     # TODO http://permalink.gmane.org/gmane.comp.web.haproxy/17348
@@ -60,6 +61,12 @@ backend {{$backend}} {{/* TODO should be configurable by etcd */}}
     balance leastconn
     option httpclose
     option forwardfor
+
+    ## http://blog.haproxy.com/2014/04/28/howto-write-apache-proxypass-rules-in-haproxy/
+    #reqrep ^([^\ :]*)\ /yt[/]?(.*)     \1\ /\2
+    #acl hdr_location res.hdr(Location) -m found
+    #rspirep ^Location: (https?://d.xtmotion.com(:[0-9]+)?)?(/.*) Location: /openfire if hdr_location
+
     {{range $upstream := ls (printf "/backends/%s/upstreams" $backend)}}
     server {{$upstream}} {{printf "/backends/%s/upstreams/%s" $backend $upstream | getv}} check
     {{end}}
@@ -68,12 +75,12 @@ frontend http-in {{range gets "/domains/*"}}{{$d := json .Value}}{{$p := base .K
     # settings for domain key {{.Key}} {{if $d.backend}}{{if exists (printf "/backends/%s/enabled" $d.backend)}}
     {{if $d.name}}acl {{$p}}_host hdr(host) -i {{$d.name}}{{end}}
     {{if $d.port}}
-    acl {{$p}}_host dst_port {{$d.port}}
+    acl {{$p}}_port dst_port {{$d.port}}
     bind :{{$d.port}}
     {{end}}
-    {{if and ($d.url) (ne $d.url "/")}}acl {{$p}}_host url_reg -i {{$d.url}}{{end}}
+    #{{if and ($d.url) (ne $d.url "/")}}acl {{$p}}_url path_beg {{$d.url}}{{end}}
     #acl {{$p}}_health path_beg /ping
-    use_backend {{$d.backend}} if {{$p}}_host
+    use_backend {{$d.backend}} if {{$p}}_host {{$p}}_port {{if and ($d.url) (ne $d.url "/")}}{ path_beg {{$d.url}} }{{end}}
     #use_backend {{$d.backend}} if {{$p}}_health
     {{else}}
     # ERROR: backend {{$d.backend}} not enabled in /backends
