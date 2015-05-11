@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+mkdir -p /prj/data/rundeck/projects
+if [ ! -d /prj/data/rundeck/config ]; then
+  mkdir -p /prj/data/rundeck/config
+  cp $RDECK_BASE/server/config/* /prj/data/rundeck/config/
+fi
