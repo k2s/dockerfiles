@@ -3,9 +3,19 @@
 # Redirect stderr so everything ends up in the log file
 exec 2>&1
 
+if [ ! -z $YOUTRACK_DATABASE_LOCATION ]; then
+    OPT="-Duser.home=$YOUTRACK_DATABASE_LOCATION"
+else
+    OPT="-Duser.home=/prj/data"
+fi
+
+if [ ! -z $YOUTRACK_BASEURL ]; then
+    OPT="$OPT -Djetbrains.youtrack.baseUrl=$YOUTRACK_BASEURL"
+fi
+
 exec java \
-	-Duser.home=/prj/data \
-    -server \
+	$OPT \
+	-server \
 	-Xmx$YOUTRACK_XMX \
 	-XX:MaxMetaspaceSize=$YOUTRACK_MAX_METASPACE \
 	-Xss2m \
