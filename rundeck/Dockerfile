@@ -1,4 +1,4 @@
-FROM bigm/base-jdk7
+FROM bigm/base-jdk8
 
 #= rundeck
 ENV RUNDECK_VERSION 2.5.0

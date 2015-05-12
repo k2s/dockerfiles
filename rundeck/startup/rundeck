@@ -20,6 +20,9 @@ if [ ! -d $CFG ]; then
     # change default password
     echo "admin:$RUNDECK_INITIAL_PASSWORD,user,admin" > $CFG/realm.properties
     echo "#user:$RUNDECK_INITIAL_PASSWORD,user" >> $CFG/realm.properties
+
+    # store project definitions in DB
+    echo "rundeck.projectsStorageType = db" >> $CFG/realm.properties
 fi
 
 if [ -n "$RUNDECK_SERVER_URL" ]; then
