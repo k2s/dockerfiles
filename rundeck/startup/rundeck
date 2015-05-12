@@ -1,7 +1,29 @@
 #!/usr/bin/env bash
 
 mkdir -p /prj/data/rundeck/projects
-if [ ! -d /prj/data/rundeck/config ]; then
-  mkdir -p /prj/data/rundeck/config
-  cp $RDECK_BASE/server/config/* /prj/data/rundeck/config/
+mkdir -p /prj/data/rundeck/data
+
+CFG=/prj/data/rundeck/config
+if [ ! -d $CFG ]; then
+    mkdir -p $CFG
+    cp $RDECK_BASE/server/config/* $CFG/
+
+    # change DB location
+    sed -i "s,dataSource.url = .*,dataSource.url = ${RUNDECK_DB_URL},g" $CFG/rundeck-config.properties
+    if [ -n "$RUNDECK_DB_USER" ]; then
+        echo "dataSource.username = ${RUNDECK_DB_USER}" >> $CFG/rundeck-config.properties
+        echo "dataSource.password = ${RUNDECK_DB_PASSWORD}" >> $CFG/rundeck-config.properties
+    fi
+
+    # change realm location
+    sed -i "s,file=.*,file=\"$CFG/realm.properties\";,g" $CFG/jaas-loginmodule.conf
+    # change default password
+    echo "admin:$RUNDECK_INITIAL_PASSWORD,user,admin" > $CFG/realm.properties
+    echo "#user:$RUNDECK_INITIAL_PASSWORD,user" >> $CFG/realm.properties
+fi
+
+if [ -n "$RUNDECK_SERVER_URL" ]; then
+    # fix Grails server URL
+    safe=$(printf '%s\n' "$RUNDECK_SERVER_URL" | sed 's/[\&/]/\\&/g')
+    sed -i "s/^grails\.serverURL=.*/grails.serverURL=$safe/g" $CFG/rundeck-config.properties
 fi

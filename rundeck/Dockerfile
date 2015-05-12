@@ -3,9 +3,6 @@ FROM bigm/base-jdk7
 #= rundeck
 ENV RUNDECK_VERSION 2.5.0
 ENV RDECK_BASE /prj/bin/rdeck
-ENV RUNDECK_HOSTNAME rundeck
-ENV RUNDECK_USER_PASSWORD rundeckpwd
-ENV RUNDECK_FORWARDED false
 
 RUN mkdir -p $RDECK_BASE \
     && /xt/tools/_download $RDECK_BASE/rundeck-launcher-$RUNDECK_VERSION.jar http://dl.bintray.com/rundeck/rundeck-maven/rundeck-launcher-$RUNDECK_VERSION.jar \
@@ -18,5 +15,15 @@ ADD supervisor/rundeck.conf /etc/supervisor/conf.d/
 ADD startup/rundeck /prj/startup/
 
 ENV RUNDECK_START_URL /
+ENV RUNDECK_SERVER_URL ""
+ENV RUNDECK_HOSTNAME ""
+ENV RUNDECK_INITIAL_PASSWORD rundeckpwd
+ENV RUNDECK_FORWARDED false
+
+ENV RUNDECK_DB_URL "jdbc:h2:file:/prj/data/rundeck/data/grailsdb;MVCC=true"
+ENV RUNDECK_DB_USER ""
+ENV RUNDECK_DB_PASSWORD ""
+
 EXPOSE 4440 4443
+VOLUME /prj/data
 #= .rundeck
