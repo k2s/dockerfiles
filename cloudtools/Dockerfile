@@ -43,7 +43,7 @@ RUN wget https://storage.googleapis.com/kubernetes-release/release/v0.10.1/bin/l
     && mv kubectl /usr/local/bin/
 
 # fleetctl
-ENV VERSION_FLEET 0.9.1
+ENV VERSION_FLEET 0.9.2
 WORKDIR /tmp
 RUN wget -nv https://github.com/coreos/fleet/releases/download/v${VERSION_FLEET}/fleet-v${VERSION_FLEET}-linux-amd64.tar.gz && \
   tar -xvf fleet-v${VERSION_FLEET}-linux-amd64.tar.gz && \
@@ -52,7 +52,7 @@ RUN wget -nv https://github.com/coreos/fleet/releases/download/v${VERSION_FLEET}
 #ENV FLEETCTL_ENDPOINT http://10.1.42.1:4001
 
 # etcdctl
-ENV VERSION_ETCD 2.0.5
+ENV VERSION_ETCD 2.0.10
 WORKDIR /tmp
 RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/etcd-v${VERSION_ETCD}-linux-amd64.tar.gz && \
   tar -xvf etcd-v${VERSION_ETCD}-linux-amd64.tar.gz && \
