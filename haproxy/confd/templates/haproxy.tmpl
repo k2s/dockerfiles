@@ -70,9 +70,9 @@ backend {{$backend}} {{/* TODO should be configurable by etcd */}}
     {{range $upstream := ls (printf "/backends/%s/upstreams" $backend)}}
     server {{$upstream}} {{printf "/backends/%s/upstreams/%s" $backend $upstream | getv}} check
     {{end}}
-    {{if exists (printf "/backends/%s/http_auth" $backend)}}
+    {{if exists (printf "/backends/%s/http_auth_userlist" $backend)}}
     # protect backend with http_auth
-    acl authorized http_auth(stats-auth)
+    acl authorized http_auth({{getv (printf "/backends/%s/http_auth_userlist" $backend)}})
     http-request auth realm Authorization if !authorized
     {{end}}
 {{end}}
