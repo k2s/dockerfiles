@@ -21,6 +21,7 @@
  
 HAPROXY_STATS       enable/disable haproxy stats (default 0) 
 HAPROXY_STATS_PWD   protect haproxy stats with password (default none)
+HAPROXY_STATS_ADMIN enable management of backends (default 0)
 
 ##Testing haproxy configuration templating with confd
 
