@@ -70,6 +70,11 @@ backend {{$backend}} {{/* TODO should be configurable by etcd */}}
     {{range $upstream := ls (printf "/backends/%s/upstreams" $backend)}}
     server {{$upstream}} {{printf "/backends/%s/upstreams/%s" $backend $upstream | getv}} check
     {{end}}
+    {{if exists (printf "/backends/%s/http_auth" $backend)}}
+    # protect backend with http_auth
+    acl authorized http_auth(stats-auth)
+    http-request auth realm Authorization if !authorized
+    {{end}}
 {{end}}
 frontend http-in {{range gets "/domains/*"}}{{$d := json .Value}}{{$p := base .Key}}
     # settings for domain key {{.Key}} {{if $d.backend}}{{if exists (printf "/backends/%s/enabled" $d.backend)}}
