@@ -16,15 +16,15 @@ RUN pip install awscli
 # zsh
 WORKDIR /tmp
 RUN /xt/tools/_apt_install zsh \
-    && git clone --recursive https://github.com/sorin-ionescu/prezto.git zprezto \
-    && wget https://raw.githubusercontent.com/Kentzo/git-archive-all/master/git-archive-all \
-    && chmod +x /tmp/git-archive-all \
-    && cd /tmp/zprezto \
-    && /tmp/git-archive-all /tmp/zprezto.tar.bz2 \
-    && tar -xf /tmp/zprezto.tar.bz2 \
-    && mv /tmp/zprezto /root/.zprezto \
-    && rm -fr /tmp/zprezto /tmp/zprezto.tar.bz2 /tmp/git-archive-all \
-    && zsh -c 'setopt EXTENDED_GLOB && for rcfile in "${ZDOTDIR:-$HOME}"/.zprezto/runcoms/^README.md(.N); do ln -s "$rcfile" "${ZDOTDIR:-$HOME}/.${rcfile:t}"; done'
+  && git clone --recursive https://github.com/sorin-ionescu/prezto.git zprezto \
+  && wget https://raw.githubusercontent.com/Kentzo/git-archive-all/master/git-archive-all \
+  && chmod +x /tmp/git-archive-all \
+  && cd /tmp/zprezto \
+  && /tmp/git-archive-all /tmp/zprezto.tar.bz2 \
+  && tar -xf /tmp/zprezto.tar.bz2 \
+  && mv /tmp/zprezto /root/.zprezto \
+  && rm -fr /tmp/zprezto /tmp/zprezto.tar.bz2 /tmp/git-archive-all \
+  && zsh -c 'setopt EXTENDED_GLOB && for rcfile in "${ZDOTDIR:-$HOME}"/.zprezto/runcoms/^README.md(.N); do ln -s "$rcfile" "${ZDOTDIR:-$HOME}/.${rcfile:t}"; done'
 
 # nodej stuff
 RUN /xt/tools/_apt_install nodejs nodejs-legacy npm
@@ -72,18 +72,23 @@ CMD ["zsh"]
 
 # some more php modules
 RUN /xt/tools/_apt_install php5-apcu php5-mcrypt php5-gd php5-mysql \
-    && php5enmod mcrypt
+  && php5enmod mcrypt
 RUN /xt/tools/_apt_install translate-toolkit
 RUN pear install SQL_Parser-0.6.0
 
 RUN /xt/tools/_apt_install libyaml-dev \
-    && yes "" | pecl install yaml \
-    && echo "extension=yaml.so" > /etc/php5/mods-available/yaml.ini \
-    && php5enmod yaml
+  && yes "" | pecl install yaml \
+  && echo "extension=yaml.so" > /etc/php5/mods-available/yaml.ini \
+  && php5enmod yaml
 
 # fix sass-globbing version
 RUN gem install sass-globbing -v 1.1.0 \
-    && gem uninstall sass-globbing -v 1.1.1
+  && gem uninstall sass-globbing -v 1.1.1
 
 # rsync client needed for deployment
 RUN /xt/tools/_apt_install rsync
+
+ADD ci.sh /xt/ci.sh
+ENV DOWNLOAD_URL ""
+ENV DOWNLOAD_RSYNC ""
+ENV UPLOAD_RSYNC ""
