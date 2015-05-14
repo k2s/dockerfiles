@@ -1,0 +1,9 @@
+[template]
+prefix = "rsync"
+keys = [
+]
+
+owner = "root"
+mode = "0644"
+src = "rsyncd.tmpl"
+dest = "/etc/rsyncd.conf"

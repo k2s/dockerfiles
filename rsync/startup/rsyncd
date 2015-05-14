@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+if [ -z "$ETCD_NODE" ]; then
+  rm -f /etc/supervisor/conf.d/confd.conf
+else
+  echo "confd will generate rsync config from etcd node: $ETCD_NODE"
+  ## make sure all needed keys are created
+  curl -L -X PUT -d dir=true http://$ETCD_NODE/v2/keys/rsync
+fi
+
+if [ $RSYNC_DAEMON -ne 0 ]; then
+  echo "rsync daemon will be started"
+else
+  rm -f /etc/supervisor/conf.d/rsyncd.conf
+fi
