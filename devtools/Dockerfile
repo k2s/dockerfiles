@@ -84,3 +84,6 @@ RUN /xt/tools/_apt_install libyaml-dev \
 # fix sass-globbing version
 RUN gem install sass-globbing -v 1.1.0 \
     && gem uninstall sass-globbing -v 1.1.1
+
+# rsync client needed for deployment
+RUN /xt/tools/_apt_install rsync
