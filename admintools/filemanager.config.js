@@ -11,21 +11,21 @@
         "browseOnly": false,
         "showConfirmation": true,
         "showThumbs": true,
-        "generateThumbnails": true,
+        "generateThumbnails": false,
         "searchBox": true,
         "listFiles": true,
         "fileSorting": "default",
         "chars_only_latin": true,
         "dateFormat": "d M Y H:i",
-        "serverRoot": true,
-        "fileRoot": false,
+        "serverRoot": false,
+        "fileRoot": "/data/",
         "baseUrl": false,
         "logger": false,
         "capabilities": ["select", "download", "rename", "delete", "replace"],
         "plugins": []
     },
     "security": {
-        "allowFolderDownload": false,
+        "allowFolderDownload": true,
         "allowChangeExtensions": false,
         "allowNoExtension": false,
         "uploadPolicy": "DISALLOW_ALL",
@@ -118,11 +118,18 @@
         "enabled": true,
         "lineNumbers": true,
         "lineWrapping": true,
-        "codeHighlight": false,
+        "codeHighlight": true,
         "theme": "elegant",
         "editExt": [
             "txt",
-            "csv"
+            "csv",
+            "php",
+            "conf",
+            "json",
+            "cfg",
+            "js",
+            "ini",
+            "sh"
         ]
     },
     "customScrollbar": {
