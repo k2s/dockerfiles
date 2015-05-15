@@ -1,7 +1,7 @@
 FROM bigm/base-deb-minimal:latest
 
 # change to rebuild whole image
-ENV XT_CACHE_REBUILD 1
+ENV XT_CACHE_REBUILD 2
 
 # let the conatiner know that there is no tty
 ENV DEBIAN_FRONTEND noninteractive
@@ -39,7 +39,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # make supervisor available
-RUN /xt/tools/_apt_install python-setuptools \
+RUN /xt/tools/_apt_install python-setuptools inotify-tools \
     && /usr/bin/easy_install supervisor supervisor-stdout \
     && mkdir -p /etc/supervisor/conf.d \
     && mkdir -p /var/log/supervisor
@@ -52,6 +52,9 @@ COPY tools /xt/tools
 
 # add our entrypoint
 ENTRYPOINT ["/xt/tools/entrypoint.sh"]
+
+# add non-root user
+RUN useradd -u 500 core
 
 # in INHERITED images add commands to be executed on docker start with:
 #ADD startup/* /prj/startup/
