@@ -16,7 +16,7 @@ RUN VERSION=4.2.1 \
 	&& /xt/tools/_download /data/http/db/index.php "http://downloads.sourceforge.net/project/adminer/Adminer/Adminer%20${VERSION}/adminer-${VERSION}-en.php" \
 	&& /xt/tools/_download /data/http/db/adminer.css "https://raw.githubusercontent.com/vrana/adminer/master/designs/pokorny/adminer.css"
 
-### TODO http://www.mollify.org/downloads.php
+### https://github.com/simogeo/Filemanager
 RUN mkdir -p /data/http/fs \
   && /xt/tools/_download /data/http/fs/fs.zip https://github.com/simogeo/Filemanager/archive/master.zip \
   && cd /data/http/fs/ \
