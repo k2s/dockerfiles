@@ -12,12 +12,25 @@ RUN rm -rf /etc/php5/fpm/pool.d && \
 
 ### adminer
 RUN VERSION=4.2.1 \
-  && mkdir -p /data/http \
-	&& /xt/tools/_download /data/http/index.php "http://downloads.sourceforge.net/project/adminer/Adminer/Adminer%20${VERSION}/adminer-${VERSION}-en.php" \
-	&& /xt/tools/_download /data/http/adminer.css "https://raw.githubusercontent.com/vrana/adminer/master/designs/pokorny/adminer.css"
+  && mkdir -p /data/http/db \
+	&& /xt/tools/_download /data/http/db/index.php "http://downloads.sourceforge.net/project/adminer/Adminer/Adminer%20${VERSION}/adminer-${VERSION}-en.php" \
+	&& /xt/tools/_download /data/http/db/adminer.css "https://raw.githubusercontent.com/vrana/adminer/master/designs/pokorny/adminer.css"
+
+### TODO http://www.mollify.org/downloads.php
+RUN mkdir -p /data/http/fs \
+  && /xt/tools/_download /data/http/fs/fs.zip https://github.com/simogeo/Filemanager/archive/master.zip \
+  && cd /data/http/fs/ \
+  && unzip fs.zip > /dev/null \
+  && rm -f fs.zip \
+  && mv Filemanager-master/* ./ \
+  && rm -rf Filemanager-master \
+  && cp scripts/filemanager.config.js.default scripts/filemanager.config.js \
+  && sed -i 's/"serverRoot": true/"serverRoot": false/' scripts/filemanager.config.js \
+  && sed -i 's|"fileRoot": false|"fileRoot": "/data/"|' scripts/filemanager.config.js
+
 
 ### TODO adminer editor
-### TODO
+### TODO phpmyadmin
 
 ### configuration files
 ADD etc /etc
