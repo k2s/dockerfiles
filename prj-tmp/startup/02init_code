@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+INIT_SCRIPT=/data/prj/_init_prj.sh
+if [ ! -f "$INIT_SCRIPT" ]; then
+  exit 0
+fi
+
+set -e
+
+echo "START init project"
+exec $INIT_SCRIPT
+echo "FINISH init project"

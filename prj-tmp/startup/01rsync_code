@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [ -z "$DOWNLOAD_RSYNC" ]; then
+  exit 0
+fi
+
+echo "download source code from rsync server"
+rsync -a --delete $DOWNLOAD_RSYNC /data/prj
