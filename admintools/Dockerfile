@@ -23,11 +23,8 @@ RUN mkdir -p /data/http/fs \
   && unzip fs.zip > /dev/null \
   && rm -f fs.zip \
   && mv Filemanager-master/* ./ \
-  && rm -rf Filemanager-master \
-  && cp scripts/filemanager.config.js.default scripts/filemanager.config.js \
-  && sed -i 's/"serverRoot": true/"serverRoot": false/' scripts/filemanager.config.js \
-  && sed -i 's|"fileRoot": false|"fileRoot": "/data/"|' scripts/filemanager.config.js
-
+  && rm -rf Filemanager-master
+ADD filemanager.config.js /data/http/fs/scripts/filemanager.config.js
 
 ### TODO adminer editor
 ### TODO phpmyadmin
