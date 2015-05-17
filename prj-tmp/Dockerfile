@@ -10,9 +10,9 @@ RUN apt-get update && apt-get install -y libpng12-dev libjpeg-dev && rm -rf /var
 RUN docker-php-ext-install mbstring pdo_mysql
 RUN pecl install xdebug
 RUN echo "zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20131226/xdebug.so" > /usr/local/etc/php/conf.d/ext-xdebug.ini \
-    && echo "xdebug.remote_enable = on" >> /usr/local/etc/php/conf.d/ext-xdebug.ini \
-    && echo "xdebug.remote_connect_back = on" >> /usr/local/etc/php/conf.d/ext-xdebug.ini \
-    && echo 'xdebug.idekey = "PHPSTORM"' >> /usr/local/etc/php/conf.d/ext-xdebug.ini
+  && echo "xdebug.remote_enable = on" >> /usr/local/etc/php/conf.d/ext-xdebug.ini \
+  && echo "xdebug.remote_connect_back = on" >> /usr/local/etc/php/conf.d/ext-xdebug.ini \
+  && echo 'xdebug.idekey = "PHPSTORM"' >> /usr/local/etc/php/conf.d/ext-xdebug.ini
 
 RUN yes "" | pecl install APCu-beta
 RUN echo "extension=apcu.so" > /usr/local/etc/php/conf.d/ext-apcu.ini
