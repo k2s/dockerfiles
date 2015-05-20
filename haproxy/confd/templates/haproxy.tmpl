@@ -74,7 +74,7 @@ backend {{$backend}} {{/* TODO should be configurable by etcd */}}
     server {{$upstream}} {{printf "/backends/%s/upstreams/%s" $backend $upstream | getv}} check
     {{end}}
     {{if exists (printf "/backends/%s/cookie_auth" $backend)}}
-    block if !{ path_beg /__aa } !{ res.hdr(X-{{getv (printf "/backends/%s/cookie_auth" $backend)}}) -m found }
+    block if !{ path_beg /__aa } { req.cook_cnt(stageaccess) eq 0 }
     {{end}}
     {{if exists (printf "/backends/%s/block_robots" $backend)}}
     rspadd X-Robots-Tag:\ noindex,\ nofollow
