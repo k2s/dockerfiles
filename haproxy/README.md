@@ -29,8 +29,9 @@ The haproxy config is generated based on [confd](https://github.com/kelseyhighto
 
 ### Etcd variables
 
-http_auth - 
-cookie_auth - 
+http_auth -  
+cookie_auth -  
+block_robots -  
 
 ##Testing haproxy configuration templating with confd
 

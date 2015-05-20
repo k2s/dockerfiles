@@ -76,6 +76,9 @@ backend {{$backend}} {{/* TODO should be configurable by etcd */}}
     {{if exists (printf "/backends/%s/cookie_auth" $backend)}}
     block if !{ path_beg /__aa } !{ res.hdr(X-{{getv (printf "/backends/%s/cookie_auth" $backend)}}) -m found }
     {{end}}
+    {{if exists (printf "/backends/%s/block_robots" $backend)}}
+    rspadd X-Robots-Tag:\ noindex,\ nofollow
+    {{end}}
     {{if exists (printf "/backends/%s/http_auth_userlist" $backend)}}
     # protect backend with http_auth
     acl authorized http_auth({{getv (printf "/backends/%s/http_auth_userlist" $backend)}})
