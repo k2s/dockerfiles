@@ -19,9 +19,18 @@
 
 ### Docker environment variables
  
-HAPROXY_STATS       enable/disable haproxy stats (default 0) 
-HAPROXY_STATS_PWD   protect haproxy stats with password (default none)
-HAPROXY_STATS_ADMIN enable management of backends (default 0)
+HAPROXY_STATS       enable/disable haproxy stats (default 0)  
+HAPROXY_STATS_PWD   protect haproxy stats with password (default none)  
+HAPROXY_STATS_ADMIN enable management of backends (default 0)  
+
+## Configuring haproxy
+
+The haproxy config is generated based on [confd](https://github.com/kelseyhightower/confd) template located in `/etc/confd` folder.
+
+### Etcd variables
+
+http_auth - 
+cookie_auth - 
 
 ##Testing haproxy configuration templating with confd
 
@@ -86,6 +95,7 @@ API https://coreos.com/etcd/docs/0.4.7/etcd-api/
     # create backend config (it should use ttl)
     etcdctl --no-sync set '/lb/backends/youtrack.service/enabled' '1'
     etcdctl --no-sync set '/lb/backends/youtrack.service/http_auth' '1'
+    etcdctl --no-sync set '/lb/backends/youtrack.service/cookie_auth' 'MyStagingProtectionCookieName'
             
     # create domain config
     etcdctl --no-sync set '/lb/domains/youtrack.example.com:80' '{"name":"youtrack.example.com","port":80,"backend":"youtrack.service","url":"\/"}'
