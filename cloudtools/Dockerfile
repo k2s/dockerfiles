@@ -70,6 +70,9 @@ RUN /xt/tools/_apt_install php5-cli php-pear libyaml-dev php5-dev build-essentia
     && php5enmod yaml \
     && /xt/tools/_apt_remove php5-dev php-pear build-essential
 
+# rsync client needed for deployment
+RUN /xt/tools/_apt_install rsync
+
 # final settings
 ENV PATH $PATH:/xt/hosting/bin
 RUN echo "set-option -g default-shell /bin/zsh" > /root/.tmux.conf
