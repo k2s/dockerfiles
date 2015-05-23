@@ -92,3 +92,6 @@ ADD ci.sh /xt/ci.sh
 ENV DOWNLOAD_URL ""
 ENV DOWNLOAD_RSYNC ""
 ENV UPLOAD_RSYNC ""
+
+### library upgrade checking tools
+RUN npm install -g bower-update npm-check-updates
