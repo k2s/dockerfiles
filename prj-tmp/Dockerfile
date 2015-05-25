@@ -30,7 +30,12 @@ RUN pear install SQL_Parser-0.6.0
 RUN echo "Include /data/apache2/conf.d/*" >> /etc/apache2/apache2.conf
 
 # support project code download with rsync whern $DOWNLOAD_RSYNC defined
-RUN apt-get update && apt-get install -y rsync && rm -rf /var/lib/apt/lists/*
+# add wkhtmltopdf
+RUN apt-get update -qq \
+  && apt-get install -yqq --force-yes --no-install-recommends rsync wkhtmltopdf \
+  && apt-get autoremove \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 ENV DOWNLOAD_RSYNC ""
 ADD run.sh /xt/run.sh
 ENTRYPOINT ["/xt/run.sh"]
