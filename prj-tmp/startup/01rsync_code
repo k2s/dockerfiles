@@ -5,7 +5,7 @@ if [ -z "$DOWNLOAD_RSYNC" ]; then
 fi
 
 echo "download source code from rsync server"
-if [ ! -d /data]; then
+if [ ! -d /data/prj ]; then
   mkdir -p /data/prj
 fi
 rsync -a --delete $DOWNLOAD_RSYNC /data/prj
