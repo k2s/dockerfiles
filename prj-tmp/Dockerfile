@@ -30,12 +30,27 @@ RUN pear install SQL_Parser-0.6.0
 RUN echo "Include /data/apache2/conf.d/*" >> /etc/apache2/apache2.conf
 
 # support project code download with rsync whern $DOWNLOAD_RSYNC defined
-# add wkhtmltopdf
 RUN apt-get update -qq \
-  && apt-get install -yqq --force-yes --no-install-recommends rsync wkhtmltopdf \
+  && apt-get install -yqq --force-yes --no-install-recommends rsync \
   && apt-get autoremove \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# add wkhtmltopdf
+# http://stackoverflow.com/questions/9604625/wkhtmltopdf-cannot-connect-to-x-server
+# https://github.com/openlabs/docker-wkhtmltopdf/blob/master/Dockerfile
+#RUN apt-get update -qq \
+#  && apt-get install -yqq --force-yes --no-install-recommends build-essential xorg libssl-dev libxrender-dev \
+#  && apt-get autoremove \
+#  && apt-get clean \
+#  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get update -qq \
+  && apt-get install -yqq --force-yes --no-install-recommends libxrender-dev libfontconfig1 \
+  && apt-get autoremove \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+ADD wkhtml /opt/wkhtml
+
 ENV DOWNLOAD_RSYNC ""
 ADD run.sh /xt/run.sh
 ENTRYPOINT ["/xt/run.sh"]
