@@ -37,29 +37,6 @@ ENV GOPATH /gopath
 ENV PATH $PATH:$GOROOT/bin:$GOPATH/bin
 RUN go get github.com/tools/godep
 
-# kubernetes
-RUN wget https://storage.googleapis.com/kubernetes-release/release/v0.10.1/bin/linux/amd64/kubectl \
-    && chmod +x kubectl \
-    && mv kubectl /usr/local/bin/
-
-# fleetctl
-ENV VERSION_FLEET 0.9.2
-WORKDIR /tmp
-RUN wget -nv https://github.com/coreos/fleet/releases/download/v${VERSION_FLEET}/fleet-v${VERSION_FLEET}-linux-amd64.tar.gz && \
-  tar -xvf fleet-v${VERSION_FLEET}-linux-amd64.tar.gz && \
-  mv /tmp/fleet-v${VERSION_FLEET}-linux-amd64/fleetctl /usr/local/bin/fleetctl && \
-  rm -rf /tmp/fleet-v${VERSION_FLEET}-linux-amd64 /tmp/fleet-v${VERSION_FLEET}-linux-amd64.tar.gz
-#ENV FLEETCTL_ENDPOINT http://10.1.42.1:4001
-
-# etcdctl
-ENV VERSION_ETCD 2.0.10
-WORKDIR /tmp
-RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/etcd-v${VERSION_ETCD}-linux-amd64.tar.gz && \
-  tar -xvf etcd-v${VERSION_ETCD}-linux-amd64.tar.gz && \
-  mv /tmp/etcd-v${VERSION_ETCD}-linux-amd64/etcdctl /usr/local/bin/etcdctl && \
-  rm -rf /tmp/etcd-v${VERSION_ETCD}-linux-amd64 /tmp/etcd-v${VERSION_ETCD}-linux-amd64.tar.gz
-#ENV ETCDCTL_PEERS 10.1.42.1:4001
-
 # some dev tools for future scripts
 RUN /xt/tools/_apt_install dialog autossh
 
@@ -72,6 +49,30 @@ RUN /xt/tools/_apt_install php5-cli php-pear libyaml-dev php5-dev build-essentia
 
 # rsync client needed for deployment
 RUN /xt/tools/_apt_install rsync
+
+# kubernetes
+ENV VERSION_KUBERNETES 0.18.2
+RUN wget https://storage.googleapis.com/kubernetes-release/release/v${VERSION_KUBERNETES}/bin/linux/amd64/kubectl \
+    && chmod +x kubectl \
+    && mv kubectl /usr/local/bin/
+
+# fleetctl
+ENV VERSION_FLEET 0.10.1
+WORKDIR /tmp
+RUN wget -nv https://github.com/coreos/fleet/releases/download/v${VERSION_FLEET}/fleet-v${VERSION_FLEET}-linux-amd64.tar.gz && \
+  tar -xvf fleet-v${VERSION_FLEET}-linux-amd64.tar.gz && \
+  mv /tmp/fleet-v${VERSION_FLEET}-linux-amd64/fleetctl /usr/local/bin/fleetctl && \
+  rm -rf /tmp/fleet-v${VERSION_FLEET}-linux-amd64 /tmp/fleet-v${VERSION_FLEET}-linux-amd64.tar.gz
+#ENV FLEETCTL_ENDPOINT http://10.1.42.1:4001
+
+# etcdctl
+ENV VERSION_ETCD 2.0.11
+WORKDIR /tmp
+RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/etcd-v${VERSION_ETCD}-linux-amd64.tar.gz && \
+  tar -xvf etcd-v${VERSION_ETCD}-linux-amd64.tar.gz && \
+  mv /tmp/etcd-v${VERSION_ETCD}-linux-amd64/etcdctl /usr/local/bin/etcdctl && \
+  rm -rf /tmp/etcd-v${VERSION_ETCD}-linux-amd64 /tmp/etcd-v${VERSION_ETCD}-linux-amd64.tar.gz
+#ENV ETCDCTL_PEERS 10.1.42.1:4001
 
 # final settings
 ENV PATH $PATH:/xt/hosting/bin
