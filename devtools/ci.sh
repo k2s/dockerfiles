@@ -26,6 +26,7 @@ if [ -d /prj/release ]; then
   if [ -n "$UPLOAD_RSYNC" ]; then
     echo "uploading release to rsync target"
     rsync -a --delete /prj/release $UPLOAD_RSYNC
+    echo "upload to rsync target FINISHED"
   fi
 else
   echo "build failed because /prj/release folder was not found"
