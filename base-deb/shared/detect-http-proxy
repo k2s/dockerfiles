@@ -19,7 +19,7 @@ show_proxy_messages=1
 # delay and therefore its recommended to put the proxy which is most likely to
 # be available on the top. If no proxy is available, a direct connection will
 # be used
-try_proxies=("$XT_APT_PROXY")
+try_proxies=($XT_APT_PROXY)
 
 print_msg() {
     # \x0d clears the line so [Working] is hidden
@@ -30,7 +30,8 @@ for proxy in "${try_proxies[@]}"; do
     # if the host machine / proxy is reachable...
 #    curl --connect-timeout 1 http://$proxy >& /dev/null
 #    if [ $? -eq 0 ]; then
-    if nc -w 1 -z ${proxy/:/ }; then
+    if nc -w 1 -z ${proxy/:/ } 2>/dev/null; then
+        export XT_APT_PROXY=$proxy
         proxy=http://$proxy
         print_msg "Proxy that will be used: $proxy"
         echo "$proxy"
@@ -38,6 +39,7 @@ for proxy in "${try_proxies[@]}"; do
     fi
 done
 print_msg "No proxy will be used"
+export XT_APT_PROXY=""
 
 # Workaround for Launchpad bug 654393 so it works with Debian Squeeze (<0.8.11)
 echo DIRECT

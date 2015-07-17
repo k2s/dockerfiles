@@ -14,13 +14,14 @@ RUN dpkg-divert --local --rename --add /sbin/initctl \
 COPY tools/_apt_install /xt/tools/_apt_install
 
 # cached apt-get
-ENV XT_APT_PROXY 172.17.42.1:3142
 RUN echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/02apt-speedup
-RUN /xt/tools/_apt_install netcat apt-utils
+RUN /xt/tools/_apt_install netcat apt-utils net-tools iputils-ping
 # http://askubuntu.com/questions/53443/how-do-i-ignore-a-proxy-if-not-available
 # docker run --name="apt-cache" -d -p 3142:3142 -v /var/cache/apt:/var/cache/apt-cacher-ng sameersbn/apt-cacher-ng:latest
 ADD shared/detect-http-proxy /etc/apt/detect-http-proxy
 ADD shared/30detectproxy etc/apt/apt.conf.d/30detectproxy
+# set host apt_proxy on your DNS to point to bigm/proxy-cache instance
+ENV XT_APT_PROXY "apt_proxy:3142 172.17.42.1:3142"
 
 # set locale to UTF-8
 #ENV LANG C.UTF-8
