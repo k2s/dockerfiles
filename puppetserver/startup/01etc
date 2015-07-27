@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ ! -d "/etc/puppetlabs" ]; then
+  echo "you have to mount /etc/puppetlabs folder to docker host"
+  exit 1
+fi
+
+if [ ! -d "/etc/puppetlabs/puppetserver" ]; then
+  echo "START copy original /etc/puppetlabs content"
+  cp -a /etc/puppetlabs_orig/* /etc/puppetlabs/
+  echo "FINISH copy original /etc/puppetlabs content"
+#  echo "check contnet of the new populated volume mount to /etc/puppetlabs and start again"
+#  exit 2
+fi
+
+exit 0
+
