@@ -53,14 +53,14 @@ RUN /xt/tools/_apt_install rsync
 # INI file manipulation from shell scripts
 RUN pip install crudini
 
-# kubernetes
-ENV VERSION_KUBERNETES 0.18.2
-RUN wget https://storage.googleapis.com/kubernetes-release/release/v${VERSION_KUBERNETES}/bin/linux/amd64/kubectl \
-    && chmod +x kubectl \
-    && mv kubectl /usr/local/bin/
+## kubernetes
+#ENV VERSION_KUBERNETES 0.18.2
+#RUN wget https://storage.googleapis.com/kubernetes-release/release/v${VERSION_KUBERNETES}/bin/linux/amd64/kubectl \
+#    && chmod +x kubectl \
+#    && mv kubectl /usr/local/bin/
 
 # fleetctl - https://github.com/coreos/fleet/releases
-ENV VERSION_FLEET 0.10.1
+ENV VERSION_FLEET 0.11.2
 WORKDIR /tmp
 RUN wget -nv https://github.com/coreos/fleet/releases/download/v${VERSION_FLEET}/fleet-v${VERSION_FLEET}-linux-amd64.tar.gz && \
   tar -xvf fleet-v${VERSION_FLEET}-linux-amd64.tar.gz && \
@@ -69,13 +69,16 @@ RUN wget -nv https://github.com/coreos/fleet/releases/download/v${VERSION_FLEET}
 #ENV FLEETCTL_ENDPOINT http://10.1.42.1:4001
 
 # etcdctl - https://github.com/coreos/etcd/releases
-ENV VERSION_ETCD 2.0.12
+ENV VERSION_ETCD 2.1.1
 WORKDIR /tmp
 RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/etcd-v${VERSION_ETCD}-linux-amd64.tar.gz && \
   tar -xvf etcd-v${VERSION_ETCD}-linux-amd64.tar.gz && \
   mv /tmp/etcd-v${VERSION_ETCD}-linux-amd64/etcdctl /usr/local/bin/etcdctl && \
   rm -rf /tmp/etcd-v${VERSION_ETCD}-linux-amd64 /tmp/etcd-v${VERSION_ETCD}-linux-amd64.tar.gz
 #ENV ETCDCTL_PEERS 10.1.42.1:4001
+
+RUN /xt/tools/_ppa_install ppa:ansible/ansible ansible
+RUN ansible-galaxy install defunctzombie.coreos-bootstrap
 
 # final settings
 ENV PATH $PATH:/xt/hosting/bin
