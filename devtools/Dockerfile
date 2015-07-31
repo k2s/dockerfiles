@@ -54,7 +54,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-7-oracle
 
 #= liquibase
 RUN /xt/tools/_apt_install mysql-client libmysql-java
-ENV VERSION_LIQUIBASE 3.3.5
+ENV VERSION_LIQUIBASE 3.4.1
 RUN /xt/tools/_download /tmp/liquibase.zip https://github.com/liquibase/liquibase/releases/download/liquibase-parent-${VERSION_LIQUIBASE}/liquibase-${VERSION_LIQUIBASE}-bin.zip \
     && unzip -q -d /opt/liquibase /tmp/liquibase.zip \
     && rm /tmp/liquibase.zip \
