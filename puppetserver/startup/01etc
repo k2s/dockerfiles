@@ -10,6 +10,7 @@ fi
 if [ ! -d "/etc/puppetlabs/puppetserver" ]; then
   echo "START copy original /etc/puppetlabs content"
   cp -a /etc/puppetlabs_orig/* /etc/puppetlabs/
+  chown -R puppet /etc/puppetlabs
   echo "FINISH copy original /etc/puppetlabs content"
 #  echo "check contnet of the new populated volume mount to /etc/puppetlabs and start again"
 #  exit 2
