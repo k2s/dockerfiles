@@ -77,8 +77,12 @@ RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/e
   rm -rf /tmp/etcd-v${VERSION_ETCD}-linux-amd64 /tmp/etcd-v${VERSION_ETCD}-linux-amd64.tar.gz
 #ENV ETCDCTL_PEERS 10.1.42.1:4001
 
+# Ansible
 RUN /xt/tools/_ppa_install ppa:ansible/ansible ansible
 RUN ansible-galaxy install defunctzombie.coreos-bootstrap
+
+# NFS client
+RUN /xt/tools/_apt_install nfs-common portmap
 
 # final settings
 ENV PATH $PATH:/xt/hosting/bin
