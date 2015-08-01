@@ -13,3 +13,7 @@ EXPOSE 111/udp 2049/tcp
 
 ADD nfs-run.sh /usr/local/bin/nfs-run
 #CMD ["/usr/local/bin/nfs-run"]
+
+
+# https://www.howtoforge.com/nfs_ssh_tunneling
+RUN sed -i 's/^RPCMOUNTDOPTS=.*/RPCMOUNTDOPTS="--manage-gids --port 2233"/' /etc/default/nfs-kernel-server

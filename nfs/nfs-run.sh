@@ -6,4 +6,4 @@
 rpcbind
 rpc.statd -d
 rpc.nfsd
-rpc.mountd --foreground
+rpc.mountd $RPCMOUNTDOPTS --foreground

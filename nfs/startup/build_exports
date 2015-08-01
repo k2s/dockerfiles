@@ -12,7 +12,7 @@ for mnt in "$mounts"/*; do
     else
       perm=rw
     fi
-    echo "$src *($perm,sync,no_subtree_check,fsid=0,no_root_squash)" >> /etc/exports
+    echo "$src *($perm,insecure,sync,no_subtree_check,fsid=0,no_root_squash)" >> /etc/exports
   fi
 done
 
