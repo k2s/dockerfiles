@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -eu
+
+mounts="$NFS_EXPORT_FOLDER"
+
+for mnt in "$mounts"/*; do
+  if [ -d "$mnt" ]; then
+    src=$mnt
+    if [[ "$src" == *_ro ]]; then
+      perm=ro
+    else
+      perm=rw
+    fi
+    echo "$src *($perm,sync,no_subtree_check,fsid=0,no_root_squash)" >> /etc/exports
+  fi
+done
+
+exportfs -a
