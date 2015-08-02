@@ -15,7 +15,7 @@ RUN /xt/tools/_install_admin_tools
 RUN mv /etc/puppetlabs /etc/puppetlabs_orig
 ADD startup/* /prj/startup/
 
-ENV PATH=/opt/puppetlabs/bin/:$PATH
+ENV PATH /opt/puppetlabs/bin/:$PATH
 EXPOSE 8140
 
 CMD [ "/opt/puppetlabs/bin/puppetserver", "foreground" ]

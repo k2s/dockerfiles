@@ -2,19 +2,18 @@
 
 set -e
 
-if [ ! -d "/etc/puppetlabs" ]; then
-  echo "you have to mount /etc/puppetlabs folder to docker host"
+FOLDER=/etc/puppetlabs
+USER=puppet
+
+if [ ! -d "$FOLDER" ]; then
+  echo "you have to mount '$FOLDER' folder to Docker host"
   exit 1
 fi
 
-if [ ! -d "/etc/puppetlabs/puppetserver" ]; then
-  echo "START copy original /etc/puppetlabs content"
-  cp -a /etc/puppetlabs_orig/* /etc/puppetlabs/
-  chown -R puppet /etc/puppetlabs
-  echo "FINISH copy original /etc/puppetlabs content"
-#  echo "check contnet of the new populated volume mount to /etc/puppetlabs and start again"
-#  exit 2
+if [ ! "$(ls -A $FOLDER)" ]; then
+  echo "populate '$FOLDER' with original content"
+  cp -a "$FOLDER"_orig/. "$FOLDER"
+  chown -R $USER "$FOLDER"
 fi
 
 exit 0
-
