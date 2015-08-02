@@ -57,6 +57,9 @@ ENTRYPOINT ["/xt/tools/entrypoint.sh"]
 # add non-root user
 RUN useradd -u 500 core
 
+# don't be ascetic
+RUN /xt/tools/_apt_install nano less mc vim
+
 # in INHERITED images add commands to be executed on docker start with:
 #ADD startup/* /prj/startup/
 # in INHERITED images configure supervisor with:
