@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+FOLDER=/etc/nagios3
+USER=nagios
+
+if [ ! -d "$FOLDER" ]; then
+  echo "you have to mount '$FOLDER' folder to Docker host"
+  exit 1
+fi
+
+if [ ! "$(ls -A $FOLDER)" ]; then
+  echo "populate '$FOLDER' with original content"
+  cp -a "$FOLDER"_orig/. "$FOLDER"
+  chown -R $USER "$FOLDER"
+fi
+
+exit 0
