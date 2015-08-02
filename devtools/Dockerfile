@@ -1,7 +1,4 @@
-FROM bigm/base-deb
-
-# basic utilities
-RUN /xt/tools/_apt_install wget tar bzip2 unzip mc less tmux nano vim telnet curl inetutils-ping
+FROM bigm/base-deb-tools
 
 # VCS
 RUN /xt/tools/_apt_install git-flow subversion
