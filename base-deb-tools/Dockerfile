@@ -1,4 +1,4 @@
 FROM bigm/base-deb
 
 # don't be ascetic
-RUN /xt/tools/_apt_install wget tar bzip2 unzip mc less tmux nano vim telnet curl inetutils-ping
+RUN /xt/tools/_apt_install wget tar bzip2 unzip mc less tmux nano vim telnet curl inetutils-ping procps
