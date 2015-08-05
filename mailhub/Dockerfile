@@ -13,7 +13,7 @@ VOLUME ["/var/lib/postfix", "/var/mail", "/var/spool/postfix", "/etc/opendkim/ke
 
 ADD rsyslog.conf /etc/rsyslog.conf
 COPY opendkim.conf /etc/opendkim.conf
-COPY etcd2etc.sh /prj/etcd2etc.sh
+COPY reconfig.sh /prj/reconfig.sh
 ADD supervisor/* /etc/supervisor/conf.d/
 ADD startup/* /prj/startup/
 

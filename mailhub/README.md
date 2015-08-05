@@ -2,10 +2,17 @@
 
 ##Starting
 
-
+    docker run -ti --rm --name mailhub \
+        -v /myconfig/mailhub/etc/opendkim/keys:/etc/opendkim/keys \
+        quay.io/bigm/mailhub
 
 ##Test
 
+Get into mailhub shell:
+
+    docker exec -ti mailhub bash
+    
+Send test email:
 
     cat <<EOF |
     Subject: postfix test mail
@@ -16,6 +23,8 @@
     sendmail user@example.com
 
 ##Dynamic reconfiguration
+
+    docker exec mailhub /prj/reconfigure.sh
 
 ##DKIM
 

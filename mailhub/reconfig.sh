@@ -24,11 +24,14 @@ if [ "$(ls -A $FOLDER)" ]; then
     echo "mail._domainkey.$d $d:mail:/etc/opendkim/keys/$d/mail.private" >> /etc/opendkim/KeyTable
     echo "*@$d mail._domainkey.$d" >> /etc/opendkim/SigningTable
   done
-
-  echo "DNS records:"
-  cat $FOLDER/*/mail.txt
 else
   postconf -X milter_protocol
   postconf -X milter_default_action
   postconf -X smtpd_milters
+fi
+
+if [ ${1:-1} -eq 1 ]; then
+  # reload postfix and dkim
+  /etc/init.d/opendkim restart
+  /etc/init.d/postfix reload
 fi
