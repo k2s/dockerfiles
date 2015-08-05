@@ -28,7 +28,7 @@ RUN echo 'date.timezone = "UTC"' > /usr/local/etc/php/conf.d/timezone.ini
 #    && rm -rf /var/lib/apt/lists/*
 
 ### mailing support
-RUN apt-get update && apt-get install -y ssmtp \
+RUN apt-get update && apt-get install -y ssmtp heirloom-mailx \
 	&& apt-get -y autoremove \
 	&& rm -rf /var/lib/apt/lists/*
 
