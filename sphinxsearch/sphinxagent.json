@@ -1,0 +1,13 @@
+{
+  "APIKEY": "REPLKEY",
+  "EVENT_LEVEL": "info",
+  "SPHINX_AS_SERVICE": "no",
+  "SECURED": "yes",
+  "APP_HOST": "0.0.0.0",
+  "ENDPOINT": "https://tools.sphinxsearch.com/notify",
+  "SPHINX_CONFIG": "/etc/sphinxsearch/sphinx.conf.sh",
+  "MONITORING": "yes",
+  "SPHINX_SERVICE_NAME": "searchd",
+  "SEARCHD_PATH": "/usr/bin/",
+  "APP_PORT": 9312
+}

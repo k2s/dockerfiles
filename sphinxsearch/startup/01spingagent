@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [ -n "$SPH_API_KEY" ]; then
+    echo "Sphinx Agent will be enabled"
+    sed  -i "s/REPLKEY/$SPH_API_KEY/g" /usr/local/sphinxmonitor/conf/sphinxagent.json
+    /usr/local/sphinxmonitor/bin/sphinxmonitor -c /usr/local/sphinxmonitor/conf/sphinxagent.json -p /usr/local/sphinxmonitor start
+fi
+
+exit 0
