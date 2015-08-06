@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-indexer -c /etc/sphinxsearch/sphinx.conf.sh xml_test
-
-exit 0

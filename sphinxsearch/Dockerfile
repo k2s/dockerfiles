@@ -12,11 +12,13 @@ ADD etc/sphinxsearch /etc/sphinxsearch
 RUN rm -f /etc/sphinxsearch/sphinx.conf
 
 # main sphinx server location
-ENV SPHINXSEARCH_CONFIG_MAIN "/etc/sphinxsearch/sphinx-main.conf"
+ENV SPHINXSEARCH_CONFIG_MAIN "/etc/sphinxsearch/main.conf"
 # space separated folders with additionals configuration files
 ENV SPHINXSEARCH_CONFIG_D "/etc/sphinxsearch/conf.d"
 # Sphinx Agens activation
 ENV SPH_API_KEY ""
+# run indexer on start
+ENV SPHINXSEARCH_STARTUP_INDEXER "--rotate --all"
 
 # startup
 COPY startup/* /prj/startup/
