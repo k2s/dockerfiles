@@ -56,6 +56,7 @@ ENTRYPOINT ["/xt/tools/entrypoint.sh"]
 
 # add non-root user
 RUN useradd -u 500 core
+ENV TERM xterm
 
 # in INHERITED images add commands to be executed on docker start with:
 #ADD startup/* /prj/startup/
