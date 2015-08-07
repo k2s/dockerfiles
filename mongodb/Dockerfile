@@ -20,7 +20,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 \
 COPY startup/* /prj/startup/
 ADD supervisor/* /etc/supervisor/conf.d/
 # configuration
-ENV MONDODB_OPTS "--storageEngine=wiredTiger"
+ENV MONGODB_OPTS "--storageEngine=wiredTiger"
 
 ## expose ports
 EXPOSE 27017 28017
