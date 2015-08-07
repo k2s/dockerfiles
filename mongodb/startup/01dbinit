@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if [ ! -d /prj/data/db ]; then
+    mkdir -p /prj/data/db
+fi
+
+#chown -R mongodb:mongodb /prj/data/db
+#numactl --interleave=all
+
+exit 0
