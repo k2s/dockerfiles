@@ -23,8 +23,6 @@ RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/lo
 
 RUN pear install SQL_Parser-0.6.0
 
-#RUN apt-get update && apt-get install -y mc && rm -rf /var/lib/apt/lists/*
-
 #ENTRYPOINT
 #
 RUN echo "Include /data/apache2/conf.d/*" >> /etc/apache2/apache2.conf
@@ -51,7 +49,12 @@ RUN apt-get update -qq \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 ADD wkhtml /opt/wkhtml
 
+RUN apt-get update && apt-get install -y libmcrypt-dev && rm -rf /var/lib/apt/lists/* \
+  && docker-php-ext-install mcrypt
 ENV DOWNLOAD_RSYNC ""
 ADD run.sh /xt/run.sh
 ENTRYPOINT ["/xt/run.sh"]
 ADD startup/* /prj/startup/
+
+RUN apt-get update && apt-get install -y mc nano && rm -rf /var/lib/apt/lists/*
+ENV TERM xterm
