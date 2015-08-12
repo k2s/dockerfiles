@@ -10,7 +10,7 @@ echo 'APT::Periodic::Enable "0";' > /etc/apt/apt.conf.d/00periodic
 rm -f /etc/cron.daily/standard
 
 # start it with supervisor
-cat <<EOF > /etc/supervisor/conf.d/cron.conf
+cat <<EOF > /etc/supervisord.d/cron.conf
 [program:cron]
 command = /usr/sbin/cron -f
 redirect_stderr=true

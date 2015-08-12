@@ -42,10 +42,10 @@ RUN apt-get update \
 # make supervisor available
 RUN /xt/tools/_apt_install python-setuptools inotify-tools \
     && /usr/bin/easy_install supervisor supervisor-stdout \
-    && mkdir -p /etc/supervisor/conf.d \
+    && mkdir -p /etc/supervisord.d \
     && mkdir -p /var/log/supervisor
-ADD shared/supervisord.conf /etc/supervisor/supervisord.conf
-CMD ["/usr/local/bin/supervisord", "-c",  "/etc/supervisor/supervisord.conf"]
+ADD shared/supervisord.conf /etc/supervisord.conf
+CMD ["/usr/local/bin/supervisord", "-c",  "/etc/supervisord.conf"]
 
 # install all /xt/tools
 RUN /xt/tools/_apt_install curl ca-certificates libssl1.0.0
@@ -61,5 +61,5 @@ ENV TERM xterm
 # in INHERITED images add commands to be executed on docker start with:
 #ADD startup/* /prj/startup/
 # in INHERITED images configure supervisor with:
-#ADD supervisor/* /etc/supervisor/conf.d/
+#ADD supervisor/* /etc/supervisord.d/
 
