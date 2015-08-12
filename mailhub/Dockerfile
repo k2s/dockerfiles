@@ -14,7 +14,7 @@ VOLUME ["/var/lib/postfix", "/var/mail", "/var/spool/postfix", "/etc/opendkim/ke
 ADD rsyslog.conf /etc/rsyslog.conf
 COPY opendkim.conf /etc/opendkim.conf
 COPY reconfig.sh /prj/reconfig.sh
-ADD supervisor/* /etc/supervisor/conf.d/
+ADD supervisor/* /etc/supervisord.d/
 ADD startup/* /prj/startup/
 
 # No TLS for connecting clients, trust docker network to be safe

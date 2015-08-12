@@ -53,7 +53,7 @@ RUN cd /etc/nagios3/ \
   && git commit -a -m "Initial commit"
 
 # configure services
-ADD supervisor/* /etc/supervisor/conf.d/
+ADD supervisor/* /etc/supervisord.d/
 ADD sites/* /etc/apache2/sites-enabled/
 
 ## this config will be used to initialize if empty config is mounted

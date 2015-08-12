@@ -76,7 +76,7 @@ Read https://github.com/coreos/etcd/blob/master/Documentation/docker_guide.md
     docker run --rm -ti \
         -v $PWD/confd:/etc/confd \
         -v /tmp/haproxy_etc:/etc/haproxy \
-        -v $PWD/supervisor/haproxy.conf:/etc/supervisor/conf.d/haproxy.conf \
+        -v $PWD/supervisor/haproxy.conf:/etc/supervisord.d/haproxy.conf \
         -e ETCD_NODE=$ETCD_NODE \
         -e HAPROXY_STATS=1 \
         -e HAPROXY_STATS_PWD=mypwd \

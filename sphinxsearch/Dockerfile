@@ -22,7 +22,7 @@ ENV SPHINXSEARCH_STARTUP_INDEXER "--rotate --all"
 
 # startup
 COPY startup/* /prj/startup/
-ADD supervisor/* /etc/supervisor/conf.d/
+ADD supervisor/* /etc/supervisord.d/
 
 # expose ports
 EXPOSE 9306 9312

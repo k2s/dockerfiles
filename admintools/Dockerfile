@@ -32,7 +32,7 @@ ADD filemanager.config.js /data/http/fs/scripts/filemanager.config.js
 ### configuration files
 ADD etc /etc
 ADD startup/* /prj/startup/
-ADD supervisor/* /etc/supervisor/conf.d/
+ADD supervisor/* /etc/supervisord.d/
 
 EXPOSE 80
-CMD ["/usr/local/bin/supervisord", "-c",  "/etc/supervisor/supervisord.conf"]
+CMD ["/usr/local/bin/supervisord", "-c",  "/etc/supervisord.conf"]

@@ -7,7 +7,7 @@ ENV NFS_EXPORT_FOLDER /exports
 RUN mkdir -p $NFS_EXPORT_FOLDER
 
 # final
-ADD supervisor/* /etc/supervisor/conf.d/
+ADD supervisor/* /etc/supervisord.d/
 ADD startup/* /prj/startup/
 EXPOSE 111/udp 2049/tcp
 

@@ -8,7 +8,7 @@ RUN /xt/tools/_download /usr/local/bin/confd https://github.com/kelseyhightower/
 # install rsync
 RUN /xt/tools/_apt_install rsync
 
-ADD supervisor/* /etc/supervisor/conf.d/
+ADD supervisor/* /etc/supervisord.d/
 ADD startup/* /prj/startup/
 ADD rsyncd.conf /etc/rsyncd.conf
 

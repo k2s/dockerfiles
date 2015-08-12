@@ -11,7 +11,7 @@ RUN mkdir -p $RDECK_BASE \
 RUN java -XX:MaxPermSize=256m -jar $RDECK_BASE/rundeck-launcher.jar --installonly
 ENV PATH $PATH:$RDECK_BASE/tools/bin
 
-ADD supervisor/rundeck.conf /etc/supervisor/conf.d/
+ADD supervisor/rundeck.conf /etc/supervisord.d/
 ADD startup/rundeck /prj/startup/
 
 ENV RUNDECK_START_URL /

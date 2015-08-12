@@ -12,6 +12,6 @@ RUN /xt/tools/_ppa_install ppa:vbernat/haproxy-1.5 haproxy
 ADD confd /etc/confd
 
 # final
-ADD supervisor/* /etc/supervisor/conf.d/
+ADD supervisor/* /etc/supervisord.d/
 ADD startup/* /prj/startup/
 EXPOSE 8080 1000
