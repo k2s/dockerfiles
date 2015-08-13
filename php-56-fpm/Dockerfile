@@ -35,14 +35,11 @@ RUN /tmp/compile-php.sh && rm /tmp/compile-php.sh
 COPY tools/* /xt/tools/
 
 #install very common extensions
-RUN /xt/tools/_apt_install libpng12-dev libjpeg-dev
+RUN /xt/tools/_apt_install libpng12-dev libjpeg-dev libbz2-dev libxslt1-dev libssh2-1-dev libmcrypt-dev
 RUN /xt/tools/php_compile_extension gd --with-png-dir=/usr --with-jpeg-dir=/usr \
 	&& /xt/tools/php_compile_extension zip \
 	&& /xt/tools/php_compile_extension mbstring \
 	&& /xt/tools/php_compile_extension pdo_mysql \
-	&& /xt/tools/php_compile_cleanup
-
-RUN /xt/tools/_apt_install libbz2-dev libxslt1-dev libssh2-1-dev libmcrypt-dev \
 	&& /xt/tools/php_compile_extension bz2 \
 	&& /xt/tools/php_compile_extension xsl \
 	&& /xt/tools/php_compile_extension xmlrpc \
@@ -52,7 +49,7 @@ RUN /xt/tools/_apt_install libbz2-dev libxslt1-dev libssh2-1-dev libmcrypt-dev \
 	&& /xt/tools/php_compile_extension ftp \
 	&& /xt/tools/php_compile_extension gettext \
 	&& /xt/tools/php_compile_extension mcrypt \
-	&& yes "" | pecl install ssh2-0.12
+	&& /xt/tools/php_compile_cleanup
 
 #sysvsem + sysvshm
 #sysvmsg?
@@ -61,7 +58,10 @@ RUN /xt/tools/_apt_install libbz2-dev libxslt1-dev libssh2-1-dev libmcrypt-dev \
 #mysql ?
 #mysqli ?
 
-RUN pecl install xdebug \
+RUN yes "" | pecl install ssh2-0.12 \
+	&& echo "extension=ssh2.so" > /usr/local/etc/php/conf.d/ext-ssh2.ini
+
+RUN yes "" | pecl install xdebug \
 		&& echo "zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20131226/xdebug.so" > /usr/local/etc/ext-xdebug.ini \
     && echo "xdebug.remote_enable = on" >> /usr/local/etc/ext-xdebug.ini \
     && echo "xdebug.remote_connect_back = on" >> /usr/local/etc/ext-xdebug.ini \
@@ -71,18 +71,25 @@ RUN yes "" | pecl install APCu-beta \
 	&& echo "extension=apcu.so" > /usr/local/etc/php/conf.d/ext-apcu.ini
 
 # stable=2.2.7
-ENV MEMCACHED_VERSION=3.0.8
+ENV MEMCACHED_VERSION 2.2.0
 RUN /xt/tools/_apt_install libmemcached-dev \
 	&& pecl install igbinary \
-	&& /xt/tools/_download /tmp/memcache.tgz https://pecl.php.net/get/memcache-${MEMCACHED_VERSION}.tgz \
-	&& cd /tmp && tar xf memcache.tgz \
-	&& cd /tmp/memcache-${MEMCACHED_VERSION} \
+	&& /xt/tools/_download /tmp/memcached.tgz https://pecl.php.net/get/memcached-${MEMCACHED_VERSION}.tgz \
+	&& cd /tmp && tar xf memcached.tgz \
+	&& cd /tmp/memcached-${MEMCACHED_VERSION} \
 	&& phpize \
-	&& ./configure \
+	&& ./configure --disable-memcached-sasl \
 	&& make \
 	&& make install \
 	&& echo "extension=igbinary.so" > /usr/local/etc/php/conf.d/ext-igbinary.ini \
-	&& echo "extension=apcu.so" > /usr/local/etc/php/conf.d/ext-apcu.ini
+	&& echo "extension=memcached.so" > /usr/local/etc/php/conf.d/ext-memcached.ini
+
+RUN /xt/tools/_apt_install libmagickwand-dev \
+	&& yes "" | pecl install imagick \
+	&& echo "extension=imagick.so" > /usr/local/etc/php/conf.d/ext-imagick.ini
+
+RUN	yes "" | pecl install mongo \
+	&& echo "extension=mongo.so" > /usr/local/etc/php/conf.d/ext-mongo.ini
 
 #.install very common extensions
 
@@ -101,17 +108,20 @@ RUN /xt/tools/_apt_install libxext6 fontconfig xfonts-base xfonts-75dpi libxrend
 	&& /xt/tools/_download /tmp/wkhtmltox.deb http://download.gna.org/wkhtmltopdf/0.12/0.12.2.1/wkhtmltox-0.12.2.1_linux-trusty-amd64.deb \
 	&& dpkg -i /tmp/wkhtmltox.deb
 
-COPY php-fpm.conf /usr/local/etc/
-COPY startup/* /prj/startup/
+# translate-toolkit
+RUN /xt/tools/_apt_install translate-toolkit
+
+COPY etc/php-fpm.conf /usr/local/etc/
+COPY etc/fpm.d/* /usr/local/etc/fpm.d/
+COPY startup/* /xt/startup/
 ADD supervisor/* /etc/supervisord.d/
 
 RUN mkdir -p /var/www/html
-WORKDIR /var/www/html
+WORKDIR /var/www
 
 ENV PHP_TIMEZONE Europe/London
 ENV PHP_CONF_VERSION production
 
 EXPOSE 9000
-#CMD ["php-fpm"]
 # .compile PHP 5.6 (cli and fpm)
 
