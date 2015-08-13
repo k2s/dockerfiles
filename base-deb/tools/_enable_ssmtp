@@ -5,7 +5,7 @@
 
 /xt/tools/_apt_install ssmtp
 
-if [ ! -d /prj/startup ]; then
-  mkdir -p /prj/startup
+if [ ! -d /xt/startup ]; then
+  mkdir -p /xt/startup
 fi
-cp -a /xt/tools/startup/00ssmtp /prj/startup/00ssmtp
+cp -a /xt/tools/startup/00ssmtp /xt/startup/00ssmtp
