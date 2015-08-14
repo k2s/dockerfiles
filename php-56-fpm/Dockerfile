@@ -111,6 +111,8 @@ RUN /xt/tools/_apt_install libxext6 fontconfig xfonts-base xfonts-75dpi libxrend
 # translate-toolkit
 RUN /xt/tools/_apt_install translate-toolkit
 
+RUN /xt/tools/_enable_ssmtp
+
 COPY etc/php-fpm.conf /usr/local/etc/
 COPY etc/fpm.d/* /usr/local/etc/fpm.d/
 COPY startup/* /xt/startup/
@@ -121,6 +123,10 @@ WORKDIR /var/www
 
 ENV PHP_TIMEZONE Europe/London
 ENV PHP_CONF_VERSION production
+
+RUN echo "xdebug.profiler_enable = 0" >> /usr/local/etc/ext-xdebug.ini \
+	&& echo "xdebug.profiler_enable_trigger = 1" >> /usr/local/etc/ext-xdebug.ini \
+	&& echo "xdebug.trace_enable_trigger = 1" >> /usr/local/etc/ext-xdebug.ini
 
 EXPOSE 9000
 # .compile PHP 5.6 (cli and fpm)
