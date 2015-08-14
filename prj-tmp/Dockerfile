@@ -58,3 +58,9 @@ ADD startup/* /prj/startup/
 
 RUN apt-get update && apt-get install -y mc nano && rm -rf /var/lib/apt/lists/*
 ENV TERM xterm
+
+RUN echo <<EOF >> /usr/local/etc/php/conf.d/ext-xdebug.ini \
+xdebug.profiler_enable = 0 \
+xdebug.profiler_enable_trigger = 1 \
+xdebug.trace_enable_trigger = 1 \
+EOF
