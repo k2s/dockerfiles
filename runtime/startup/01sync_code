@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+if [ ! -d /data/prj ]; then
+  mkdir -p /data/prj
+fi
+
+if [ -n "$DOWNLOAD_RSYNC" ]; then
+  echo "download source code from rsync server"
+  rsync -a --delete $DOWNLOAD_RSYNC /data/prj
+fi
+
+if [ -n "$DOWNLOAD_S3" ]; then
+  echo "download source code from S3 storage"
+  s3cmd get -f --access_key=$AWS_ACCESS_KEY --secret_key=$AWS_SECRET_KEY s3://$DOWNLOAD_S3 /data/prj/_deploy.tar.gz
+fi
+
+if [ -f /data/prj/_deploy.tar.gz ]; then
+  echo "unpacking /data/prj/_deploy.tar.gz"
+  cd /data/prj
+  tar -zxf _deploy.tar.gz
+  rm -f _deploy.tar.gz
+fi
