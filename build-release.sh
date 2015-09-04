@@ -2,6 +2,9 @@
 
 set -x
 
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR
+
 tag=latest
 
 source ./build-local.sh $@

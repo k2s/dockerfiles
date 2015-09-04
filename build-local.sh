@@ -2,6 +2,9 @@
 
 set -x
 
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR
+
 # TODO monito solution https://www.brianchristner.io/how-to-setup-docker-monitoring/
 # TODO wordpress
 
