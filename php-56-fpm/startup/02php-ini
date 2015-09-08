@@ -8,22 +8,7 @@ fi
 
 ### set timezone
 if [ -n "$PHP_TIMEZONE" ]; then
-    cat <<EOF > /usr/local/etc/php/conf.d/_custom.ini
-date.timezone = "$PHP_TIMEZONE"
-apc.shm_size = 192M
-short_open_tag=On
-session.gc_maxlifetime=1209600
-
-; Use igbinary as session serializer
-session.serialize_handler=igbinary
-
-; Enable or disable compacting of duplicate strings
-; The default is On.
-igbinary.compact_strings=On
-
-; Use igbinary as serializer in APC cache (3.1.7 or later)
-apc.serializer=igbinary
-EOF
+    echo 'date.timezone = "$PHP_TIMEZONE"' > /usr/local/etc/php/conf.d/timezone.ini
 fi
 
 # expose_php = Off
