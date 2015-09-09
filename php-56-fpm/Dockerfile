@@ -111,7 +111,8 @@ RUN /xt/tools/_apt_install libxext6 fontconfig xfonts-base xfonts-75dpi libxrend
 # translate-toolkit
 RUN /xt/tools/_apt_install translate-toolkit
 
-RUN /xt/tools/_enable_ssmtp
+RUN /xt/tools/_enable_ssmtp \
+	&& echo 'sendmail_path = "/usr/sbin/ssmtp -t"' > /usr/local/etc/php/conf.d/sendmail.ini
 
 COPY etc/php-fpm.conf /usr/local/etc/
 COPY etc/fpm.d/* /usr/local/etc/fpm.d/
