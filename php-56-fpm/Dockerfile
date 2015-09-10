@@ -114,6 +114,9 @@ RUN /xt/tools/_apt_install translate-toolkit
 RUN /xt/tools/_enable_ssmtp \
 	&& echo 'sendmail_path = "/usr/sbin/ssmtp -t"' > /usr/local/etc/php/conf.d/sendmail.ini
 
+# another PDF tool
+RUN /xt/tools/_apt_install pdftk
+
 COPY etc/php-fpm.conf /usr/local/etc/
 COPY etc/fpm.d/* /usr/local/etc/fpm.d/
 COPY startup/* /xt/startup/
