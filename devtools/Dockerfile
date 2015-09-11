@@ -93,3 +93,7 @@ ENV UPLOAD_RSYNC ""
 
 ### library upgrade checking tools
 RUN npm install -g bower-update npm-check-updates
+
+### email management tools
+RUN /xt/tools/_apt_install fetchmail procmail \
+  && PERL_MM_USE_DEFAULT=1 cpan -if Mail::DeliveryStatus::BounceParser
