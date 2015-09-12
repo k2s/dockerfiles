@@ -28,6 +28,8 @@ Send test email:
 
 ##DKIM
 
+https://www.howtoforge.com/set-up-dkim-domainkeys-identified-mail-working-with-postfix-on-centos-using-opendkim
+
     # list of active domains
     docker exec -ti <container> sh -c "cat /etc/opendkim/keys/*/mail.txt"
     
@@ -35,4 +37,4 @@ Send test email:
     echo "dkim test mail body" | mail -r from_dkim@EXAMPLE.COM -s "dkim test mail " EXAMPLE@dkimvalidator.com
   
 ##TODO  
-* optionaly we don't want to log rsyslogd to stdout
+* restarting of opendkim doesn't work, we need to fix supervisorctl in parent image
