@@ -30,6 +30,8 @@ else
   postconf -X smtpd_milters
 fi
 
+chown -R opendkim:opendkim /etc/opendkim
+chmod -R go-wrx /etc/opendkim/keys
 if [ ${1:-1} -eq 1 ]; then
   # reload postfix and dkim
   /etc/init.d/opendkim restart

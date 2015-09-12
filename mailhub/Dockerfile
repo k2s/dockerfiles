@@ -4,7 +4,7 @@ FROM bigm/base-deb-tools
 # https://github.com/nightexcessive/postfix-forwarder
 # https://github.com/pocesar/docker-postfix-dovecot
 
-RUN /xt/tools/_apt_install postfix perl opendkim opendkim-tools rsyslog
+RUN /xt/tools/_apt_install postfix perl opendkim opendkim-tools rsyslog pfqueue heirloom-mailx
 
 RUN mkdir -p /etc/opendkim/keys
 
