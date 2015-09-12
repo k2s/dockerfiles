@@ -28,8 +28,11 @@ Send test email:
 
 ##DKIM
 
-
+    # list of active domains
     docker exec -ti <container> sh -c "cat /etc/opendkim/keys/*/mail.txt"
+    
+    # to validate obtain email from http://dkimvalidator.com and replace upper case text:  
+    echo "dkim test mail body" | mail -r from_dkim@EXAMPLE.COM -s "dkim test mail " EXAMPLE@dkimvalidator.com
   
 ##TODO  
 * optionaly we don't want to log rsyslogd to stdout

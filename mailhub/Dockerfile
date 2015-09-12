@@ -23,4 +23,5 @@ ENV \
   POSTFIX_mydestination=localhost \
   POSTFIX_mynetworks=0.0.0.0/0 \
   POSTFIX_smtp_tls_security_level=may \
-  POSTFIX_smtpd_tls_security_level=none
+  POSTFIX_smtpd_tls_security_level=none \
+  DKIM_SELECTOR=mail
