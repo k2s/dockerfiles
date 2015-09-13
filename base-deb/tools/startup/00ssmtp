@@ -15,6 +15,7 @@ chfn -f "root at $XT_MAIL_HOSTNAME" root
 cat <<EOF > /etc/ssmtp/ssmtp.conf
 root=root
 mailhub=$XT_MAIL_SERVER
+FromLineOverride=yes
 EOF
 
 #cat <<EOF > /etc/ssmtp/revaliases
