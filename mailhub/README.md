@@ -37,4 +37,3 @@ https://www.howtoforge.com/set-up-dkim-domainkeys-identified-mail-working-with-p
     echo "dkim test mail body" | mail -r from_dkim@EXAMPLE.COM -s "dkim test mail " EXAMPLE@dkimvalidator.com
   
 ##TODO  
-* restarting of opendkim doesn't work, we need to fix supervisorctl in parent image
