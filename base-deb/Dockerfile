@@ -45,6 +45,7 @@ RUN /xt/tools/_apt_install python-setuptools inotify-tools \
     && mkdir -p /etc/supervisord.d \
     && mkdir -p /var/log/supervisor
 ADD shared/supervisord.conf /etc/supervisord.conf
+ADD shared/onstart.conf /etc/supervisord.d/onstart.conf
 CMD ["/usr/local/bin/supervisord", "-c",  "/etc/supervisord.conf"]
 
 # install all /xt/tools
