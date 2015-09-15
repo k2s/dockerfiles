@@ -1,13 +1,15 @@
 #!/bin/bash
 
 if [ "$1" != "force" ]; then
-  q=$(mailq | grep -c "^[A-Z0-9]")
-  if [ $q -ne 0 ]; then
-    echo "!!! mail queue is not empty ($q) will wait until all emails are sent"
+  # q=$(mailq | grep -c "^[A-Z0-9]")
+  q=$(mailq | head -1)
+  if [ "$q" != "Mail queue is empty" ]; then
+    echo "!!! mail queue is not empty will wait until all emails are sent"
   fi
 
-  while [ $q -ne 0 ]; do
-    sleep 10
+  while [ "$q" != "Mail queue is empty" ]; do
+    sleep 5
+    q=$(mailq | head -1)
   done
 fi
 

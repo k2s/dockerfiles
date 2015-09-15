@@ -28,3 +28,9 @@ To make mail queue persistent you have to mount volume `/var/spool/postfix`.
     # correctly shutdown the Docker instance to make sure that 
     docker exec -ti $DID /xt/tools/shutdown.sh
     
+Or use the XT_RUN functionality of `bigm/base-deb` Docker image:
+     
+    docker run --name test -ti --rm -e \ 
+        XT_MAIL_SERVER=xxxx.xtmotion.com \ 
+        -e XT_RUN=/tmp/example.sh -v example.sh:/tmp/example.sh bigm/php-56-fpm-postfix     
+       
