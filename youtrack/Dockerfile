@@ -1,7 +1,7 @@
 FROM bigm/base-jdk8
 
 #= youtrack
-ENV YOUTRACK_VERSION 6.5.16333
+ENV YOUTRACK_VERSION 6.5.16433
 RUN mkdir -p /prj/bin \
     && /xt/tools/_download /prj/bin/youtrack-$YOUTRACK_VERSION.jar http://download.jetbrains.com/charisma/youtrack-$YOUTRACK_VERSION.jar \
     && ln -s /prj/bin/youtrack-$YOUTRACK_VERSION.jar /prj/bin/youtrack.jar
