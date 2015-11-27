@@ -6,10 +6,10 @@ RUN apt-get update && apt-get install -y libc6-dev \
     && apt-get -y autoremove \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -o xtbackup.tar.gz -SL https://github.com/k2s/xtbackup/archive/v0.8.5.tar.gz \
-	&& echo "0ac64cb2250efaec784d764ee66caa49 *xtbackup.tar.gz" | md5sum -c - \
+RUN curl -o xtbackup.tar.gz -SL https://github.com/k2s/xtbackup/archive/v0.8.6.tar.gz \
+	&& echo "08cb6382a2d627da4abad2eec3c1b49d *xtbackup.tar.gz" | md5sum -c - \
 	&& tar -xzf xtbackup.tar.gz -C /usr/src/ \
-	&& mv /usr/src/xtbackup-0.8.5 /usr/src/xtbackup \
+	&& mv /usr/src/xtbackup-0.8.6 /usr/src/xtbackup \
 	&& rm xtbackup.tar.gz \
 	&& chmod +x "/usr/src/xtbackup/xtbackup.sh" \
 	&& ln -s /usr/src/xtbackup/xtbackup.sh /usr/bin/xtbackup
