@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -x
+if [ ! -d /usr/src/php ]; then
+    mkdir -p /usr/src/php
+    tar -xof /php.tar.bz2 -C /usr/src/php --strip-components=1
+fi
+
+ext=$1
+cd "/usr/src/php/ext/$ext"
+phpize
+./configure "${@:2}"
+
+make
+make install
+
+for module in modules/*.so; do
+	if [ -f "$module" ]; then
+		if grep -q zend_extension_entry "$module"; then
+			# https://wiki.php.net/internals/extensions#loading_zend_extensions
+			line="zend_extension=$(basename "$module")"
+		else
+			line="extension=$(basename "$module")"
+		fi
+		echo $line >> "/usr/local/etc/php/conf.d/$ext.ini"
+#		echo "$line" >> "/usr/local/etc/php/conf.d/ext-$ext.ini"
+#		if ! grep -q "$line" "$ini"; then
+#			echo "$line" >> "/usr/local/etc/php/conf.d/ext-$ext.ini"
+#		fi
+	fi
+done
+make clean

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+### create link to production/development php.ini version
+PHP_CONF_VERSION=${PHP_CONF_VERSION:-production}
+if [ ! -f /usr/local/etc/php/php.ini ]; then
+    ln -s /usr/local/etc/php/php.ini-${PHP_CONF_VERSION} /usr/local/etc/php/php.ini
+fi
+
+### set timezone
+if [ -n "$PHP_TIMEZONE" ]; then
+    echo 'date.timezone = "'$PHP_TIMEZONE'"' > /usr/local/etc/php/conf.d/timezone.ini
+fi
+
+echo 'expose_php = Off' > /usr/local/etc/php/conf.d/expose_php.ini
