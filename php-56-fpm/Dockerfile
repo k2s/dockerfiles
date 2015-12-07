@@ -27,7 +27,7 @@ RUN /xt/tools/_apt_install $PHP_EXTRA_BUILD_DEPS \
 
 RUN gpg --keyserver pool.sks-keyservers.net --recv-keys 6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3 0BD78B5F97500D450838F95DFE857D9A90D90EC1
 
-ENV PHP_VERSION 5.6.13
+ENV PHP_VERSION 5.6.16
 
 COPY compile-php.sh /tmp/compile-php.sh
 RUN /tmp/compile-php.sh && rm /tmp/compile-php.sh
@@ -67,7 +67,7 @@ RUN yes "" | pecl install xdebug \
     && echo "xdebug.remote_connect_back = on" >> /usr/local/etc/ext-xdebug.ini \
     && echo 'xdebug.idekey = "PHPSTORM"' >> /usr/local/etc/ext-xdebug.ini
 
-RUN yes "" | pecl install APCu-beta \
+RUN yes "" | pecl install APCu \
 	&& echo "extension=apcu.so" > /usr/local/etc/php/conf.d/ext-apcu.ini
 
 # stable=2.2.7
