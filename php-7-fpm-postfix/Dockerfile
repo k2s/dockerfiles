@@ -1,0 +1,15 @@
+FROM bigm/php-7-fpm
+
+### add postfix daemon
+RUN /xt/tools/_apt_install postfix heirloom-mailx
+# rsyslog pfqueue ?
+
+### replace ssmtp with postfix
+RUN rm -f /xt/startup/00ssmtp \
+  && echo 'sendmail_path = "/usr/sbin/sendmail -t -i"' > /usr/local/etc/php/conf.d/sendmail.ini
+
+ADD supervisor/* /etc/supervisord.d/
+ADD startup/* /xt/startup/
+ADD tools/* /xt/tools/
+
+VOLUME ["/var/spool/postfix"]

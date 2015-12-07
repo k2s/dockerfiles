@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [ -n "$XT_MAIL_SERVER" ]; then
+  echo "Postfix will relay to $XT_MAIL_SERVER"
+  postconf -e "relayhost=$XT_MAIL_SERVER"
+fi
+
+for e in ${!POSTFIX_*} ; do postconf -e "${e:8}=${!e}" ; done
