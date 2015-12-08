@@ -14,8 +14,8 @@ RUN pip install awscli
 WORKDIR /tmp
 RUN /xt/tools/_apt_install zsh \
     && git clone --recursive https://github.com/sorin-ionescu/prezto.git zprezto \
-    && wget https://raw.githubusercontent.com/Kentzo/git-archive-all/master/git-archive-all \
-    && chmod +x /tmp/git-archive-all \
+    && wget https://raw.githubusercontent.com/Kentzo/git-archive-all/master/git_archive_all.py \
+    && mv /tmp/git_archive_all.py /tmp/git-archive-all && chmod +x /tmp/git-archive-all \
     && cd /tmp/zprezto \
     && /tmp/git-archive-all /tmp/zprezto.tar.bz2 \
     && tar -xf /tmp/zprezto.tar.bz2 \
