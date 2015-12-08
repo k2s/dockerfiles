@@ -11,7 +11,7 @@ RUN rm -rf /etc/php5/fpm/pool.d && \
   mkdir /etc/php5/fpm/pool.d
 
 ### adminer
-RUN VERSION=4.2.2 \
+RUN VERSION=4.2.3 \
   && mkdir -p /data/http/db \
 	&& /xt/tools/_download /data/http/db/index.php "http://downloads.sourceforge.net/project/adminer/Adminer/Adminer%20${VERSION}/adminer-${VERSION}-en.php" \
 	&& /xt/tools/_download /data/http/db/adminer.css "https://raw.githubusercontent.com/vrana/adminer/master/designs/pokorny/adminer.css"
