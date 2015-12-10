@@ -4,7 +4,7 @@ FROM bigm/base-deb-tools
 RUN /xt/tools/_apt_install git-flow
 
 # interact with S3 bucket
-RUN /xt/tools/_apt_install s3cmd
+RUN /xt/tools/_apt_install python-magic s3cmd
 
 # Amazon CLI
 RUN /xt/tools/_apt_install python-pip jq

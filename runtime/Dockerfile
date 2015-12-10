@@ -5,7 +5,7 @@ RUN /xt/tools/_apt_install rsync
 
 # interact with S3 bucket
 RUN /xt/tools/_apt_install python-pip \
-  && pip install s3cmd
+  && pip install python-magic s3cmd
 
 ADD startup/* /prj/startup/
 VOLUME /data/prj
