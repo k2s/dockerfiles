@@ -81,6 +81,9 @@ RUN ansible-galaxy install defunctzombie.coreos-bootstrap
 # NFS client
 RUN /xt/tools/_apt_install nfs-common portmap
 
+# mosh client
+RUN /xt/tools/_apt_install mosh
+
 # final settings
 ENV PATH $PATH:/xt/hosting/bin
 RUN echo "set-option -g default-shell /bin/zsh" > /root/.tmux.conf
