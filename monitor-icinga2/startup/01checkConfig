@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+icinga2 daemon -C
+
+if [ ! -f /etc/icingaweb2/config.ini ]; then
+    icingacli setup token create
+else
+    # if apache auth_digest authentification
+    if [ -n "$ICINGAWEB_PASSWORD" ]; then
+        echo "Enabling apache2 auth_digest module"
+        (echo -n "$ICINGAWEB_USER:$ICINGAWEB_REALM:" && echo -n "$ICINGAWEB_USER:$ICINGAWEB_REALM:$ICINGAWEB_PASSWORD" | md5sum | awk '{print $1}' ) > /etc/icingaweb2/.icingawebdigest
+        ln -sf /etc/apache2/mods-available/auth_digest.load /etc/apache2/mods-enabled/
+
+        cat <<EOF > /etc/apache2/conf-enabled/icingaweb2-digest.conf
+<Directory "/usr/share/icingaweb2/public">
+    AuthType digest
+    AuthName "Icinga Web 2"
+    AuthDigestProvider file
+    AuthUserFile /etc/icingaweb2/.icingawebdigest
+    Require valid-user
+</Directory>
+EOF
+    fi
+fi
