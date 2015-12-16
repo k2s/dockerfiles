@@ -97,3 +97,7 @@ RUN npm install -g bower-update npm-check-updates
 ### email management tools
 RUN /xt/tools/_apt_install fetchmail procmail \
   && PERL_MM_USE_DEFAULT=1 cpan -if Mail::DeliveryStatus::BounceParser
+
+### enable sending emails from inside of this docker
+RUN /xt/tools/_enable_ssmtp \
+    && /xt/tools/_apt_install heirloom-mailx
