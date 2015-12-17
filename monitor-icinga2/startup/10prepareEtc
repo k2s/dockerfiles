@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+if [ ! -f /etc/icinga2/icinga2.conf ]; then
+    echo "populate /etc/icinga2"
+    cp -rp /prj/populate/icinga2/. /etc/icinga2/
+fi
+
+if [ ! -f /etc/icingaweb2/config.ini ]; then
+    echo "populate /etc/icingaweb2"
+    cp -rp /prj/populate/icingaweb2. /etc/icingaweb2/
+fi
+
+# enable modules
+if [ ! -e /etc/icingaweb2/enabledModules ]; then
+    mkdir -p /etc/icingaweb2/enabledModules
+    ln -s /usr/share/icingaweb2/modules/monitoring /etc/icingaweb2/enabledModules/monitoring
+    ln -s /usr/share/icingaweb2/modules/doc /etc/icingaweb2/enabledModules/doc
+    ln -s /usr/share/icingaweb2/modules/iframe /etc/icingaweb2/enabledModules/iframe
+fi
+# fix permissions
+chown -R www-data:nagios /etc/icingaweb2/*

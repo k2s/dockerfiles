@@ -27,7 +27,10 @@ RUN sed -i -e 's/^.* NodeName = .*/const NodeName = "docker-icinga2"/gi' /etc/ic
 RUN sed -i 's/;date.timezone =/date.timezone = UTC/g' /etc/php5/apache2/php.ini
 
 # enable features
-RUN icinga2 feature enable command
+RUN icinga2 feature enable command \
+    && icinga2 feature enable livestatus \
+    && usermod -a -G nagios www-data
+## icinga2 feature enable compatlog ??? http://docs.icinga.org/icinga2/latest/doc/module/icinga2/chapter/icinga2-features#db-ido
 
 RUN /xt/tools/_apt_install mysql-client
 
@@ -38,7 +41,7 @@ RUN \
     && ln -s /usr/share/icingaweb2/modules/monitoring /etc/icingaweb2/enabledModules/monitoring \
     && ln -s /usr/share/icingaweb2/modules/doc /etc/icingaweb2/enabledModules/doc \
     && ln -s /usr/share/icingaweb2/modules/iframe /etc/icingaweb2/enabledModules/iframe \
-    && chown -R www-data:icingaweb2 /etc/icingaweb2/* \
+    && chown -R www-data:nagios /etc/icingaweb2/* \
     && mkdir -p /var/run/icinga2/cmd \
     && chown nagios:nagios /var/run/icinga2 \
     && chmod 0755 /var/run/icinga2 \
@@ -63,5 +66,11 @@ ENV ICINGAWEB_MYSQL_PASSWORD secret
 ENV ICINGAWEB_MYSQL_DB icinga2
 ENV ICINGAWEB_MYSQL_PORT ""
 ENV ICINGAWEB_MYSQL_FROM "%"
+
+#VOLUME ["/etc/icinga2", "/etc/icingaweb2", "/var/lib/icinga2", "/usr/share/icingaweb2"]
+# TODO create tool to copy data to /prj/populate?
+RUN mkdir -p /prj/populate \
+    && cp -rp /etc/icinga2 /prj/populate/icinga2 \
+    && cp -rp /etc/icingaweb2 /prj/populate/icingaweb2
 
 # TODO graphite support
