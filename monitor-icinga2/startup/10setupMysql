@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+
+if [ -n "$ICINGAWEB_MYSQL_HOST" ]; then
+    cat <<INI > /etc/icingaweb2/resources.ini
+[icingaweb2_db]
+type                = "db"
+db                  = "mysql"
+host                = "$ICINGAWEB_MYSQL_HOST"
+port                = "$ICINGAWEB_MYSQL_PORT"
+dbname              = "$ICINGAWEB_MYSQL_DB"
+username            = "$ICINGAWEB_MYSQL_USER"
+password            = "$ICINGAWEB_MYSQL_PASSWORD"
+prefix              = "icingaweb_"
+charset = ""
+persistent = "0"
+
+[icinga2_ido]
+type                = "db"
+db                  = "mysql"
+host                = "$ICINGAWEB_MYSQL_HOST"
+port                = "$ICINGAWEB_MYSQL_PORT"
+dbname              = "$ICINGAWEB_MYSQL_DB"
+username            = "$ICINGAWEB_MYSQL_USER"
+password            = "$ICINGAWEB_MYSQL_PASSWORD"
+charset = ""
+persistent = "0"
+INI
+
+cat <<INI > /etc/icinga2/features-available/ido-mysql.conf
+/**
+ * The db_ido_mysql library implements IDO functionality
+ * for MySQL.
+ */
+
+library "db_ido_mysql"
+
+object IdoMysqlConnection "ido-mysql" {
+  user = "$ICINGAWEB_MYSQL_USER",
+  password = "$ICINGAWEB_MYSQL_PASSWORD",
+  host = "$ICINGAWEB_MYSQL_HOST",
+  database = "$ICINGAWEB_MYSQL_DB"
+}
+INI
+
+        cat <<EOF > /etc/icingaweb2/authentication.ini
+[icingaweb2]
+backend = "db"
+resource = "icingaweb2_db"
+EOF
+
+    icinga2 feature enable ido-mysql
+
+    if [ -n "$ICINGAWEB_MYSQL_PORT" ]; then
+        PORT="--port $ICINGAWEB_MYSQL_PORT"
+    else
+        PORT=""
+    fi
+    if [ -z "$ICINGAWEB_INIT" ]; then
+        mysql  --batch --silent --host $ICINGAWEB_MYSQL_HOST $PORT -u $ICINGAWEB_MYSQL_USER -p$ICINGAWEB_MYSQL_PASSWORD $ICINGAWEB_MYSQL_DB \
+            -e "INSERT INTO icingaweb_user (name, active, password_hash) VALUES ('icingaadmin', 1, '\$1\$iQSrnmO9\$T3NVTu0zBkfuim4lWNRmH.') ON DUPLICATE KEY UPDATE password_hash='\$1\$iQSrnmO9\$T3NVTu0zBkfuim4lWNRmH.';"
+    fi
+fi
+
+if [ -z "$ICINGAWEB_INIT" ]; then
+    exit 0
+fi
+
+if [ "$ICINGAWEB_INIT" != "mysql" ]; then
+    exit 0
+fi
+
+echo "setup Icingna2 to use MySQL backend"
+
+if [ -n "$ICINGAWEB_MYSQL_ADMIN_USER" ]; then
+    echo "create database and populate it"
+    cat <<SQL | mysql --host $ICINGAWEB_MYSQL_HOST $PORT -u $ICINGAWEB_MYSQL_ADMIN_USER -p$ICINGAWEB_MYSQL_ADMIN_PASSWORD --batch --silent
+DROP DATABASE IF EXISTS $ICINGAWEB_MYSQL_DB ;
+CREATE DATABASE IF NOT EXISTS $ICINGAWEB_MYSQL_DB ;
+GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON $ICINGAWEB_MYSQL_DB.* TO '$ICINGAWEB_MYSQL_USER'@'$ICINGAWEB_MYSQL_FROM' IDENTIFIED BY '$ICINGAWEB_MYSQL_PASSWORD';
+FLUSH PRIVILEGES;
+SQL
+    #GRANT ALL ON $ICINGAWEB_MYSQL_DB.* TO `icinga`@`$ICINGAWEB_MYSQL_FROM` IDENTIFIED BY 'icinga';
+    mysql --host $ICINGAWEB_MYSQL_HOST $PORT -u $ICINGAWEB_MYSQL_ADMIN_USER -p$ICINGAWEB_MYSQL_ADMIN_PASSWORD $ICINGAWEB_MYSQL_DB < /usr/share/icinga2-ido-mysql/schema/mysql.sql
+    mysql --host $ICINGAWEB_MYSQL_HOST $PORT -u $ICINGAWEB_MYSQL_ADMIN_USER -p$ICINGAWEB_MYSQL_ADMIN_PASSWORD $ICINGAWEB_MYSQL_DB < /usr/share/icingaweb2/etc/schema/mysql.schema.sql
+fi
+
+# stop starting docker instance after setup
+exit 1

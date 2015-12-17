@@ -3,11 +3,10 @@ FROM bigm/base-deb-tools
 
 # install icinga2
 RUN /xt/tools/_ppa_install ppa:formorer/icinga \
-    icinga2 icinga2-ido-mysql icingaweb2 php5-cli
-
-# plugins
-RUN /xt/tools/_apt_install nagios-plugins nagios-plugins-contrib nagios-plugins-extra
-RUN /xt/tools/_apt_install apache2-utils
+    apache2-utils php5-cli php5-mysql \
+    icinga2 icinga2-ido-mysql \
+    icingaweb2 icingaweb2-module-monitoring icingaweb2-module-doc \
+    nagios-plugins nagios-plugins-contrib nagios-plugins-extra
 
 # syntax highlighting
 RUN echo '## Icinga 2' >> /etc/nanorc \
@@ -30,10 +29,15 @@ RUN sed -i 's/;date.timezone =/date.timezone = UTC/g' /etc/php5/apache2/php.ini
 # enable features
 RUN icinga2 feature enable command
 
+RUN /xt/tools/_apt_install mysql-client
+
 # create needed folders for later "icinga2 daemon" (based on /etc/init.d/icinga2 start)
 ADD etc/ /etc/
 RUN \
     mkdir -p /etc/icingaweb2/enabledModules \
+    && ln -s /usr/share/icingaweb2/modules/monitoring /etc/icingaweb2/enabledModules/monitoring \
+    && ln -s /usr/share/icingaweb2/modules/doc /etc/icingaweb2/enabledModules/doc \
+    && ln -s /usr/share/icingaweb2/modules/iframe /etc/icingaweb2/enabledModules/iframe \
     && chown -R www-data:icingaweb2 /etc/icingaweb2/* \
     && mkdir -p /var/run/icinga2/cmd \
     && chown nagios:nagios /var/run/icinga2 \
@@ -52,5 +56,12 @@ EXPOSE 80 443 5665
 ENV ICINGAWEB_USER admin
 ENV ICINGAWEB_REALM "Icinga Web 2"
 #ENV ICINGAWEB_PASSWORD
+
+#ENV ICINGAWEB_MYSQL_HOST localhost
+ENV ICINGAWEB_MYSQL_USER icingaweb2
+ENV ICINGAWEB_MYSQL_PASSWORD secret
+ENV ICINGAWEB_MYSQL_DB icinga2
+ENV ICINGAWEB_MYSQL_PORT ""
+ENV ICINGAWEB_MYSQL_FROM "%"
 
 # TODO graphite support
