@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# https://blog.netways.de/2014/07/17/jabber-notifications-mit-icinga-2/
 import xmpp, os, sys
 
 if len(sys.argv) < 3:

@@ -1,4 +1,4 @@
-#BUILD_PUSH=quay
+#BUILD_PUSH=hub,quay
 FROM bigm/base-deb-tools
 # see: https://github.com/Icinga/docker-icinga2
 
@@ -33,7 +33,7 @@ RUN icinga2 feature enable command \
     && usermod -a -G nagios www-data
 ## icinga2 feature enable compatlog ??? http://docs.icinga.org/icinga2/latest/doc/module/icinga2/chapter/icinga2-features#db-ido
 
-RUN /xt/tools/_apt_install mysql-client python-pip python-xmpp
+RUN /xt/tools/_apt_install mysql-client python-pip python-xmpp python-dns
 
 # create needed folders for later "icinga2 daemon" (based on /etc/init.d/icinga2 start)
 ADD root/ /
