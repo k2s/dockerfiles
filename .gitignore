@@ -46,3 +46,4 @@ crashlytics.properties
 crashlytics-build.properties
 local-build-all.sh
 test.sh
+.builderInfo

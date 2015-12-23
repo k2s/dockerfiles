@@ -1,0 +1,456 @@
+#!/usr/bin/env php
+<?php
+// TODO read this configuration from INI file
+
+/** 1. create builder instance **/
+// TODO add support for ~/
+$builder = DockerBuilder::factory();
+
+/** 2. add at least one root folder where subfolders contain Dockerfile **/
+// TODO user should be overidable with comment in Dockerfile
+$builder->addRootFolder(dirname(__FILE__), 'bigm');
+
+/** 3. configure repository aliases **/
+// TODO repo should be represented as class and we need to support login, file system, etc.
+$builder->setRepository('hub', '');
+$builder->setRepository('quay', 'quay.io');
+
+/** 4. include images to process **/
+// single image
+$builder->add('bigm/monitor-icinga2');
+// image and all it's parent images (up to first frozen image)
+$builder->addUpTo('bigm/monitor-icinga2');
+// the whole image tree found in
+$builder->addAll();
+
+/** 5. froze processing on some images **/
+$builder->addFrozenImage('bigm/base-deb-minimal');
+
+/** 6. build **/
+$builder->generateMissingTs();
+$builder->build();
+
+/** 7. push **/
+$builder->push();
+
+//// build single image
+//$builder->build('bigm/base-deb');
+
+//// build all image and all parent images before
+// it is possible to define up to what parent the build process should bubble
+//
+// start building all images related to bigm/base-deb-tools, including bigm/base-deb-tools
+//$builder->buildUpTo('bigm/base-deb-tools');
+
+
+///
+//$builder->buildAll();
+
+//$builder->build('bigm/monitor-icinga2');
+//$builder->buildUpTo('bigm/monitor-icinga2');
+
+
+//// build*() methods remember what images were builded and we will upload them now
+//$builder->push();
+
+/////////////////////////////////////////////////////////////
+class DockerBuilder
+{
+    const INFO_FILE = '.builderInfo';
+    private static $_instance;
+    private $_images = [];
+    private $_frozen = [];
+    private $_repos = [];
+    private $_tempDir = false;
+    private $_tempNames = [];
+    private $_readyToProcess;
+
+    public static function factory($tempFolder = false)
+    {
+        self::$_instance = new DockerBuilder();
+        if ($tempFolder) {
+            self::$_instance->setTempFolder($tempFolder);
+        }
+        return self::$_instance;
+    }
+
+    private function __construct()
+    {
+        $this->_tempDir = sys_get_temp_dir();
+    }
+
+    function __destruct()
+    {
+        // make sure we remove all temporary names generated
+        foreach ($this->_tempNames as $fn) {
+            @unlink($fn);
+        }
+    }
+
+    function setTempFolder($tmpFolder)
+    {
+        $this->_tempDir = $tmpFolder;
+    }
+
+    public static function getTempName($ext)
+    {
+        $fn = tempnam(self::$_instance->_tempDir, '') . $ext;
+        self::$_instance->_tempNames[] = $fn;
+        return $fn;
+    }
+
+    function addRootFolder($folder, $user)
+    {
+        foreach (array_filter(glob($folder . '/*'), 'is_dir') as $dir) {
+            $this->_images[$user . '/' . basename($dir)] = $dir;
+        }
+
+    }
+
+    function setRepository($alias, $repo)
+    {
+        $this->_repos[$alias] = $repo;
+    }
+
+    function addFrozenImage($imageName)
+    {
+        $this->_frozen[$imageName] = true;
+    }
+
+    function addAll()
+    {
+        // TODO build tree
+
+    }
+
+    function addUpTo($imageName)
+    {
+        $images = [];
+        while ($this->hasImage($imageName) && !$this->isFrozen($imageName)) {
+            $dockerFile = $this->_getDockerFile($imageName);
+            if ($dockerFile) {
+                $images[] = $imageName;
+                $imageName = $dockerFile->getParent();
+            }
+        };
+
+        $this->_readyToProcess = array_reverse($images);
+    }
+
+    function add($imageName)
+    {
+        $this->_readyToProcess = [$imageName];
+    }
+
+    function build()
+    {
+        foreach ($this->getFlatImageList() as $imageName) {
+            $dockerFile = $this->_getDockerFile($imageName);
+            $dockerFile->build();
+        }
+    }
+
+    function getFlatImageList()
+    {
+        // TODO flatten tree into correctly ordered list
+        return $this->_readyToProcess;
+    }
+
+    function push()
+    {
+        foreach ($this->getFlatImageList() as $imageName) {
+            $dockerFile = $this->_getDockerFile($imageName);
+            $dockerFile->push();
+        }
+    }
+
+    function _getDockerFile($imageName)
+    {
+        if (!is_object($imageName)) {
+            $imageName = new ImageName($imageName);
+        }
+        // locate folder
+        if (!$this->hasImage($imageName)) {
+            throw new DockerException("build folder for image '$imageName' not found");
+        }
+
+        // create object
+        return new DockerFile($this->_images[$imageName->getName()], $imageName->getName());
+    }
+
+    function hasImage($imageName)
+    {
+        if (!is_object($imageName)) {
+            $imageName = new ImageName($imageName);
+        }
+
+        return array_key_exists($imageName->getName(), $this->_images);
+    }
+
+    function isFrozen($imageName)
+    {
+        if (!is_object($imageName)) {
+            $imageName = new ImageName($imageName);
+        }
+
+        return array_key_exists($imageName->getName(), $this->_frozen);
+    }
+
+    public function generateMissingTs()
+    {
+        foreach ($this->getFlatImageList() as $imageName) {
+            $dockerFile = $this->_getDockerFile($imageName);
+            $dockerFile->setCachedTs();
+        }
+    }
+}
+
+class DockerFile
+{
+    private $_name;
+    private $_folder;
+    private $_wantedLayersbuildMethod = 'build';
+
+    public function __construct($imageFolder, $imageName)
+    {
+        $this->_folder = $imageFolder;
+        $this->_name = $imageName;
+
+        $s = file_get_contents($this->_getDockerfilePath());
+        if (!preg_match('/^FROM (.*)$/m', $s, $m)) {
+            throw new DockerException("FROM not found");
+        }
+        $this->_parent = new ImageName($m[1]);
+
+        if (preg_match('/^#BUILD_METHOD=(.+)$/m', $s, $m)) {
+            $this->_wantedLayersbuildMethod = $m[1];
+        }
+    }
+
+    public function getParent()
+    {
+        return $this->_parent;
+    }
+
+    public function getWantedLayers()
+    {
+        return $this->_wantedLayersbuildMethod;
+    }
+
+    public function build($force = false)
+    {
+        if (!$force) {
+            $tsOld = $this->getCachedTs();
+            if (false !== $tsOld) {
+                $ts = $this->getContextTs();
+                if ($ts == $tsOld) {
+                    // nothing to rebuild
+                    return;
+                }
+            }
+        }
+
+        $name = escapeshellarg($this->_name);
+        $folder = escapeshellarg($this->_folder . '/');
+        $nocache = ""; // --no-cache
+
+        switch ($this->getWantedLayers()) {
+            case "single":
+                // test only: this will miss all Docker directives
+                // single layer
+                $nameFlat = escapeshellarg($this->_name . "-flat");
+                $this->_exec("docker build $nocache -t $name $folder");
+                $tmpFn = DockerBuilder::getTempName('.tar.gz');
+                $this->_exec("docker run --rm -i $name tar zpc --exclude=/etc/hostname --exclude=/etc/resolv.conf --exclude=/etc/hosts --one-file-system / > $tmpFn");
+                $this->_exec("docker rmi $name || true");
+                $this->_exec("docker import - $nameFlat < " . escapeshellarg($tmpFn));
+                unlink($tmpFn);
+                if (file_exists($this->_folder . '/Dockerfile.post-flat')) {
+                    $postFlatFile = "$this->_folder/Dockerfile.post-flat";
+                } else {
+                    die("TODO use docker inspect --format='{{json .config}}' to build Dockerfile.post-flat file");
+                }
+
+                $postFlatFile = escapeshellarg($postFlatFile);
+                $this->_exec("docker build -t $name -f $postFlatFile $folder");
+                $this->_exec("docker rmi $nameFlat");
+                break;
+            case "docker-squash":
+                // very little improvement, requires sudo, requires external tool - see https://github.com/jwilder/docker-squash
+                $this->_exec("docker build $nocache -t $name $folder");
+                $this->_exec("docker save $name | sudo docker-squash | docker load");
+                break;
+            case "compile":
+                // use FROM image and optimize Dockerfile to create 1 additional layer
+                throw new DockerException("compile not implemented");
+                break;
+            case "build":
+                // normal docker build
+                $this->_exec("docker build $nocache -t $name $folder");
+                break;
+            default:
+                throw new DockerException("unknown build method: " . $this->getWantedLayers());
+        }
+
+        // write time stamp
+        $this->setCachedTs();
+    }
+
+    public function setCachedTs()
+    {
+        $buildTsFn = $this->_folder . '/' . DockerBuilder::INFO_FILE;
+        file_put_contents($buildTsFn, $this->getContextTs());
+    }
+
+    public function getCachedTs()
+    {
+        $buildTsFn = $this->_folder . '/' . DockerBuilder::INFO_FILE;
+        return file_exists($buildTsFn) ? file_get_contents($buildTsFn) : false;
+    }
+
+    public function push()
+    {
+    }
+
+    public function _exec($cmd)
+    {
+        // http://stackoverflow.com/questions/692000/how-do-i-write-stderr-to-a-file-while-using-tee-with-a-pipe
+        $buildLog = fopen("buildLog", "w");
+        $def = array(
+//            0 => array("pipe", "r"),  // stdin
+            1 => array("pipe", "w"),  // stdout
+            2 => array("pipe", "w"),   // stderr ?? instead of a file
+            3 => $buildLog
+        );
+
+        $ok = true;
+        $process = proc_open($cmd, $def, $pipes);
+        if (is_resource($process)) {
+//            fwrite($pipes[0], $plain_text);
+//            fclose($pipes[0]);
+            while ($s = fgets($pipes[1], 1024)) {
+                // TODO output only steps
+//                if (preg_match('/^Step \d+ :/', $s)) {
+                echo $s;
+//                }
+            }
+            fclose($pipes[1]);
+
+            while ($s = fgets($pipes[2], 1024)) {
+                if (!$ok) {
+                    $ok = false;
+                    echo "!!!!!!!!!!!!!!!!!!!!!!!!\n";
+                }
+                echo $s;
+            }
+            fclose($pipes[2]);
+        }
+        fclose($buildLog);
+
+        $ret = proc_close($process);
+        if ($ret) {
+            throw new DockerException("ERROR in: $cmd");
+        }
+
+        return $ok;
+    }
+
+    private function _getDockerfilePath()
+    {
+        return $this->_folder . '/Dockerfile';
+    }
+
+    public function getContextTs()
+    {
+        $ts = 0;
+        $files = $this->getContextFiles();
+        if (array_key_exists($this->_folder . '/' . DockerBuilder::INFO_FILE, $files)) {
+            unset($files[$this->_folder . '/' . DockerBuilder::INFO_FILE]);
+        }
+        foreach ($files as $file) {
+            $ts = max($ts, filemtime($file));
+        }
+
+        return $ts;
+    }
+
+    private function getContextFiles()
+    {
+        // based on http://stackoverflow.com/questions/19981583/php-filtering-files-and-paths-according-gitignore
+        $dir = $this->_folder;
+        $matches = glob("$dir/*");
+        $lines = file_exists($dir . '/.dockerignore') ? file($dir . '/.dockerignore') : [];
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') continue;                 # empty line
+            if (substr($line, 0, 1) == '#') continue;   # a comment
+            if (substr($line, 0, 1) == '!') {           # negated glob
+                $line = substr($line, 1);
+                $files = array_diff(glob("$dir/*"), glob("$dir/$line"));
+            } else {                                    # normal glob
+                $files = glob("$dir/$line");
+            }
+            $matches = array_merge($matches, $files);
+        }
+        return $matches;
+    }
+}
+
+class ImageName
+{
+    public $repository;
+    public $user;
+    public $name;
+    public $tag;
+    public $digest;
+
+    public function __construct($imageName)
+    {
+        $s = $imageName;
+        $w = explode(":", $s, 2);
+        if (count($w) > 1) {
+            $s = $w[0];
+            $this->tag = $w[1];
+        } else {
+            $w = explode("@", $s, 2);
+            if (count($w) > 1) {
+                $s = $w[0];
+                $this->digest = $w[1];
+            }
+        }
+
+        $w = explode("/", $s);
+        switch (count($w)) {
+            case 1:
+                $this->name = $w[0];
+                break;
+            case 2:
+                $this->user = $w[0];
+                $this->name = $w[1];
+                break;
+            case 3:
+                $this->repository = $w[0];
+                $this->user = $w[1];
+                $this->name = $w[2];
+                break;
+            default:
+                throw new DockerException("wrong image name format: '$imageName'");
+        }
+    }
+
+    public function getName()
+    {
+        // TODO not correct
+        return $this->user . '/' . $this->name;
+    }
+
+    public function __toString()
+    {
+        return $this->getName();
+    }
+}
+
+class DockerException extends Exception
+{
+
+}
