@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 // TODO read this configuration from INI file
+// TODO support tagging
 
 /** 1. create builder instance **/
 // TODO add support for ~/
@@ -19,7 +20,7 @@ $builder->setRepository('quay', 'quay.io');
 // single image
 $builder->add('bigm/monitor-icinga2');
 // image and all it's parent images (up to first frozen image)
-$builder->addUpTo('bigm/monitor-icinga2');
+//$builder->addUpTo('bigm/monitor-icinga2');
 // the whole image tree found in
 $builder->addAll();
 
@@ -27,7 +28,7 @@ $builder->addAll();
 $builder->addFrozenImage('bigm/base-deb-minimal');
 
 /** 6. build **/
-$builder->generateMissingTs();
+//$builder->markAsBuild();
 $builder->build();
 
 /** 7. push **/
@@ -79,6 +80,11 @@ class DockerBuilder
         $this->_tempDir = sys_get_temp_dir();
     }
 
+    public static function warn($string)
+    {
+        echo "W: $string" . PHP_EOL;
+    }
+
     function __destruct()
     {
         // make sure we remove all temporary names generated
@@ -110,6 +116,15 @@ class DockerBuilder
     function setRepository($alias, $repo)
     {
         $this->_repos[$alias] = $repo;
+    }
+
+    public static function getRepository($alias)
+    {
+        if (array_key_exists($alias, self::$_instance->_repos)) {
+            return self::$_instance->_repos[$alias];
+        } else {
+            return false;
+        }
     }
 
     function addFrozenImage($imageName)
@@ -196,7 +211,7 @@ class DockerBuilder
         return array_key_exists($imageName->getName(), $this->_frozen);
     }
 
-    public function generateMissingTs()
+    public function markAsBuild()
     {
         foreach ($this->getFlatImageList() as $imageName) {
             $dockerFile = $this->_getDockerFile($imageName);
@@ -209,13 +224,19 @@ class DockerFile
 {
     private $_name;
     private $_folder;
+    private $_parent;
     private $_wantedLayersbuildMethod = 'build';
+    private $_repoAliases;
 
     public function __construct($imageFolder, $imageName)
     {
         $this->_folder = $imageFolder;
         $this->_name = $imageName;
 
+        $this->readBuildMeta();
+    }
+
+    public function readBuildMeta() {
         $s = file_get_contents($this->_getDockerfilePath());
         if (!preg_match('/^FROM (.*)$/m', $s, $m)) {
             throw new DockerException("FROM not found");
@@ -224,6 +245,12 @@ class DockerFile
 
         if (preg_match('/^#BUILD_METHOD=(.+)$/m', $s, $m)) {
             $this->_wantedLayersbuildMethod = $m[1];
+        }
+
+        if (preg_match('/^#BUILD_PUSH=(.+)$/m', $s, $m)) {
+            $this->_repoAliases = explode(',', $m[1]);
+        } else {
+            $this->_repoAliases = [];
         }
     }
 
@@ -310,6 +337,18 @@ class DockerFile
 
     public function push()
     {
+        foreach ($this->getTargetRepositories() as $alias) {
+            $repo = DockerBuilder::getRepository($alias);
+            if (false === $repo) {
+                DockerBuilder::warn("repository '$alias' unknown, skipping");
+            } else {
+                // TODO $repo shuld be object and it should handle push steps
+                $name = escapeshellarg($this->_name);
+                $targetName = escapeshellarg(($repo ? $repo . '/' : '') . $this->_name);
+                $this->_exec("docker tag -f $name $targetName");
+                $this->_exec("docker push $targetName");
+            }
+        }
     }
 
     public function _exec($cmd)
@@ -393,6 +432,11 @@ class DockerFile
             $matches = array_merge($matches, $files);
         }
         return $matches;
+    }
+
+    public function getTargetRepositories()
+    {
+        return $this->_repoAliases;
     }
 }
 
