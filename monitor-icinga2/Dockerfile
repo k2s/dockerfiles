@@ -1,3 +1,4 @@
+#BUILD_PUSH=quay
 FROM bigm/base-deb-tools
 # see: https://github.com/Icinga/docker-icinga2
 
@@ -32,10 +33,10 @@ RUN icinga2 feature enable command \
     && usermod -a -G nagios www-data
 ## icinga2 feature enable compatlog ??? http://docs.icinga.org/icinga2/latest/doc/module/icinga2/chapter/icinga2-features#db-ido
 
-RUN /xt/tools/_apt_install mysql-client
+RUN /xt/tools/_apt_install mysql-client python-pip python-xmpp
 
 # create needed folders for later "icinga2 daemon" (based on /etc/init.d/icinga2 start)
-ADD etc/ /etc/
+ADD root/ /
 RUN \
     mkdir -p /etc/icingaweb2/enabledModules \
     && ln -s /usr/share/icingaweb2/modules/monitoring /etc/icingaweb2/enabledModules/monitoring \
@@ -51,8 +52,8 @@ RUN \
 #    && find /etc/icingaweb2 -type f -name "*.ini" -exec chmod 660 {} \; \
 #    && find /etc/icingaweb2 -type d -exec chmod 2770 {} \; \
 
-ADD startup/* /prj/startup/
-ADD supervisor/* /etc/supervisord.d/
+ADD startup/* /xt/startup/
+ADD supervisor.d/* /etc/supervisord.d/
 
 EXPOSE 80 443 5665
 
@@ -68,9 +69,10 @@ ENV ICINGAWEB_MYSQL_PORT ""
 ENV ICINGAWEB_MYSQL_FROM "%"
 
 #VOLUME ["/etc/icinga2", "/etc/icingaweb2", "/var/lib/icinga2", "/usr/share/icingaweb2"]
-# TODO create tool to copy data to /prj/populate?
-RUN mkdir -p /prj/populate \
-    && cp -rp /etc/icinga2 /prj/populate/icinga2 \
-    && cp -rp /etc/icingaweb2 /prj/populate/icingaweb2
+
+# folders under /xt/defaults will be populated in instance if they are empty
+RUN mkdir -p /xt/defaults/etc \
+    && cp -rp /etc/icinga2 /xt/defaults/etc/icinga2 \
+    && cp -rp /etc/icingaweb2 /xt/defaults/etc/icingaweb2
 
 # TODO graphite support
