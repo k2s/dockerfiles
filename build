@@ -354,12 +354,12 @@ class DockerFile
     public function _exec($cmd)
     {
         // http://stackoverflow.com/questions/692000/how-do-i-write-stderr-to-a-file-while-using-tee-with-a-pipe
-        $buildLog = fopen("buildLog", "w");
+//        $buildLog = fopen("buildLog", "w");
         $def = array(
 //            0 => array("pipe", "r"),  // stdin
             1 => array("pipe", "w"),  // stdout
-            2 => array("pipe", "w"),   // stderr ?? instead of a file
-            3 => $buildLog
+            2 => array("pipe", "w")   // stderr ?? instead of a file
+//            3 => $buildLog
         );
 
         $ok = true;
@@ -384,7 +384,7 @@ class DockerFile
             }
             fclose($pipes[2]);
         }
-        fclose($buildLog);
+//        fclose($buildLog);
 
         $ret = proc_close($process);
         if ($ret) {
