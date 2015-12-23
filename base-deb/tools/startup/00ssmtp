@@ -3,7 +3,7 @@
 XT_MAIL_DISABLE=${XT_MAIL_DISABLE:-0}
 XT_MAIL_SERVER=${XT_MAIL_SERVER:-smtp}
 XT_MAIL_ROOT_TO=${XT_MAIL_ROOT_TO:-postman}
-XT_MAIL_HOSTNAME=${XT_MAIL_HOSTNAME:-$(hostname)}
+XT_MAIL_ROOT_TO=${XT_MAIL_HOSTNAME:-$(hostname)}
 
 if [ $XT_MAIL_DISABLE -ne 0 ]; then
   echo "email system disabled by XT_MAIL_DISABLE env variable"

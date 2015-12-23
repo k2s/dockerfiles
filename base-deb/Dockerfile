@@ -1,7 +1,9 @@
+#BUILD_METHOD=single
+#BUILD_PUSH=hub,quay
 FROM bigm/base-deb-minimal:latest
 
 # change to rebuild whole image
-ENV XT_CACHE_REBUILD 2
+ENV XT_CACHE_REBUILD 3
 
 # let the conatiner know that there is no tty
 ENV DEBIAN_FRONTEND noninteractive
@@ -15,7 +17,7 @@ COPY tools/_apt_install /xt/tools/_apt_install
 
 # cached apt-get
 RUN echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/02apt-speedup
-RUN /xt/tools/_apt_install netcat apt-utils net-tools iputils-ping
+RUN /xt/tools/_apt_install netcat socat apt-utils net-tools iputils-ping
 # http://askubuntu.com/questions/53443/how-do-i-ignore-a-proxy-if-not-available
 # docker run --name="apt-cache" -d -p 3142:3142 -v /var/cache/apt:/var/cache/apt-cacher-ng sameersbn/apt-cacher-ng:latest
 ADD shared/detect-http-proxy /etc/apt/detect-http-proxy
@@ -58,7 +60,7 @@ ENTRYPOINT ["/xt/tools/entrypoint.sh"]
 # add non-root user
 RUN useradd -u 500 core
 ENV TERM xterm
-ENV XT_USER_STARTUP /prj/startup
+ENV XT_PRJ_STARTUP /prj/startup
 
 # in INHERITED images add commands to be executed on docker start with:
 #ADD startup/* /xt/startup/
