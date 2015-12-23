@@ -10,7 +10,7 @@ if [ ! -d "$FOLDER" ]; then
   exit 1
 fi
 
-if [ ! "$(ls -A $FOLDER)" ]; then
+if [ ! -f "$FOLDER/nagios.cfg" ]; then
   echo "populate '$FOLDER' with original content"
   cp -a "$FOLDER"_orig/. "$FOLDER"
   chown -R $USER "$FOLDER"
