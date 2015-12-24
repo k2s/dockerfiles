@@ -20,12 +20,15 @@ $builder->setRepository('quay', 'quay.io');
 // single image
 $builder->add('bigm/monitor-icinga2');
 // image and all it's parent images (up to first frozen image)
-//$builder->addUpTo('bigm/monitor-icinga2');
-// the whole image tree found in
+$builder->addUpTo('bigm/monitor-icinga2');
+// the whole image tree found in root folders
 $builder->addAll();
 
 /** 5. froze processing on some images **/
 $builder->addFrozenImage('bigm/base-deb-minimal');
+
+/** it is possible to generated dot file for http://www.graphviz.org/  */
+$builder->toDot('/tmp/tree.dot');
 
 /** 6. build **/
 //$builder->markAsBuild();
@@ -64,7 +67,7 @@ class DockerBuilder
     private $_repos = [];
     private $_tempDir = false;
     private $_tempNames = [];
-    private $_readyToProcess;
+    private $_readyToProcess = [];
 
     public static function factory($tempFolder = false)
     {
@@ -134,8 +137,9 @@ class DockerBuilder
 
     function addAll()
     {
-        // TODO build tree
-
+        foreach ($this->_images as $imageName => $dir) {
+            $this->add($imageName);
+        }
     }
 
     function addUpTo($imageName)
@@ -144,17 +148,33 @@ class DockerBuilder
         while ($this->hasImage($imageName) && !$this->isFrozen($imageName)) {
             $dockerFile = $this->_getDockerFile($imageName);
             if ($dockerFile) {
-                $images[] = $imageName;
+                $this->add($dockerFile);
                 $imageName = $dockerFile->getParent();
             }
         };
-
-        $this->_readyToProcess = array_reverse($images);
     }
 
     function add($imageName)
     {
-        $this->_readyToProcess = [$imageName];
+        if (is_object($imageName)) {
+            $dockerFile = $imageName;
+            $imageName = $imageName->getName();
+        } else {
+            $dockerFile = false;
+        }
+        if (!array_key_exists($imageName, $this->_readyToProcess)) {
+            try {
+                $dockerFile = $dockerFile ? $dockerFile : $this->_getDockerFile($imageName);
+            } catch (DockerException $ex) {
+//                DockerBuilder::warn("skipping image '$imageName': " . $ex->getMessage());
+                $dockerFile = false;
+            }
+            if ($dockerFile) {
+                $this->_readyToProcess[$imageName] = $dockerFile->getParent();
+            } else {
+                DockerBuilder::warn("skipping image '$imageName': not found");
+            }
+        }
     }
 
     function build()
@@ -165,10 +185,74 @@ class DockerBuilder
         }
     }
 
+    function getTreeImageList()
+    {
+        $parent_key = 'p';
+        $children_key = 'c';
+        $tree = $this->_readyToProcess;
+
+        // remove frozen images
+        foreach ($tree as $imageName => $parent) {
+            if (array_key_exists($imageName, $this->_frozen)) {
+                unset($tree[$imageName]);
+            }
+        }
+
+        // clear references to unknown parents
+        foreach ($tree as $imageName => $parent) {
+            if (!array_key_exists($parent->getName(), $tree)) {
+                $tree[$imageName] = ['p' => null, 'c' => []];
+            } else {
+                $tree[$imageName] = ['p' => $parent->getName(), 'c' => []];
+            }
+        }
+
+        // treeze the array - http://stackoverflow.com/questions/4196157/create-array-tree-from-array-list
+        $orphans = true;
+        while ($orphans) {
+            $orphans = false;
+            foreach ($tree as $k => $v) {
+                // is there $a[$k] sons?
+                $sons = false;
+                foreach ($tree as $x => $y)
+                    if (isset($y[$parent_key]) and $y[$parent_key] != false and $y[$parent_key] == $k) {
+                        $sons = true;
+                        $orphans = true;
+                        break;
+                    }
+
+                // $a[$k] is a son, without children, so i can move it
+                if (!$sons and isset($v[$parent_key]) and $v[$parent_key] != false) {
+                    $tree[$v[$parent_key]][$children_key][$k] = $v;
+                    unset($tree[$k]);
+                }
+            }
+        }
+
+        return $tree;
+    }
+
     function getFlatImageList()
     {
-        // TODO flatten tree into correctly ordered list
-        return $this->_readyToProcess;
+        // flatten tree into correctly ordered list
+        $tree = $this->getTreeImageList();
+
+        // flatten tree
+        return $this->_getChildrenFor($tree, null);
+    }
+
+    protected function _getChildrenFor(&$tree, $forParent)
+    {
+        $images = [];
+        foreach ($tree as $imageName => $parent) {
+            $parent = is_object($parent) ? $parent->getName() : $parent;
+            if ($parent === $forParent) {
+                // TODO could be optimized by removing processed items from $tree
+                $images = array_merge($images, [$imageName], $this->_getChildrenFor($tree, $imageName));
+            }
+        }
+
+        return $images;
     }
 
     function push()
@@ -218,6 +302,13 @@ class DockerBuilder
             $dockerFile->setCachedTs();
         }
     }
+
+    public function toDot($string)
+    {
+        // TODO generate dot file
+        var_dump($this->getTreeImageList());
+        die;
+    }
 }
 
 class DockerFile
@@ -236,7 +327,11 @@ class DockerFile
         $this->readBuildMeta();
     }
 
-    public function readBuildMeta() {
+    public function readBuildMeta()
+    {
+        if (!file_exists($this->_getDockerfilePath())) {
+            throw new DockerException("missing file " . $this->_getDockerfilePath());
+        }
         $s = file_get_contents($this->_getDockerfilePath());
         if (!preg_match('/^FROM (.*)$/m', $s, $m)) {
             throw new DockerException("FROM not found");
@@ -437,6 +532,11 @@ class DockerFile
     public function getTargetRepositories()
     {
         return $this->_repoAliases;
+    }
+
+    public function getName()
+    {
+        return $this->_name;
     }
 }
 
