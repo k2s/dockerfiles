@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-curl --data chat_id=$2 --data-urlencode text="$3"  "$1/sendMessage"
+URL=${1:-$TELEGRAM_API}
+curl --data chat_id=$2 --data-urlencode text="$3"  "$URL/sendMessage"
