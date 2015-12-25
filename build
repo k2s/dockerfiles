@@ -187,27 +187,11 @@ class DockerBuilder
 
     function getTreeImageList()
     {
-        $parent_key = 'p';
-        $children_key = 'c';
-        $tree = $this->_readyToProcess;
-
-        // remove frozen images
-        foreach ($tree as $imageName => $parent) {
-            if (array_key_exists($imageName, $this->_frozen)) {
-                unset($tree[$imageName]);
-            }
-        }
-
-        // clear references to unknown parents
-        foreach ($tree as $imageName => $parent) {
-            if (!array_key_exists($parent->getName(), $tree)) {
-                $tree[$imageName] = ['p' => null, 'c' => []];
-            } else {
-                $tree[$imageName] = ['p' => $parent->getName(), 'c' => []];
-            }
-        }
+        $tree = $this->_getSanitizedList();
 
         // treeze the array - http://stackoverflow.com/questions/4196157/create-array-tree-from-array-list
+        $parent_key = 'p';
+        $children_key = 'c';
         $orphans = true;
         while ($orphans) {
             $orphans = false;
@@ -239,6 +223,29 @@ class DockerBuilder
 
         // flatten tree
         return $this->_getChildrenFor($tree, null);
+    }
+
+    private function _getSanitizedList()
+    {
+        $tree = $this->_readyToProcess;
+
+        // remove frozen images
+        foreach ($tree as $imageName => $parent) {
+            if (array_key_exists($imageName, $this->_frozen)) {
+                unset($tree[$imageName]);
+            }
+        }
+
+        // clear references to unknown parents
+        foreach ($tree as $imageName => $parent) {
+            if (!array_key_exists($parent->getName(), $tree)) {
+                $tree[$imageName] = ['p' => null, 'c' => []];
+            } else {
+                $tree[$imageName] = ['p' => $parent->getName(), 'c' => []];
+            }
+        }
+
+        return $tree;
     }
 
     protected function _getChildrenFor(&$tree, $forParent)
@@ -303,10 +310,28 @@ class DockerBuilder
         }
     }
 
-    public function toDot($string)
+    public function toDot($fileName)
     {
-        // TODO generate dot file
-        var_dump($this->getTreeImageList());
+        // generate dot file
+        $l = [];
+        $l[] = <<<EOF
+digraph images {
+	ratio = fill;
+	node [style=filled];
+EOF;
+
+        foreach ($this->_getSanitizedList() as $imageName => $parent) {
+            if ($parent['p']) {
+                $l[] = "\t\"$parent[p]\" -> \"$imageName\"";
+            } else {
+                // TODO get one more parent
+                $l[] = "\t\"$imageName\"";
+            }
+        }
+        $l[] = '}';
+
+        $l = implode("\n", $l);
+        file_put_contents($fileName, $l);
         die;
     }
 }
