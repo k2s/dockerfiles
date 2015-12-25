@@ -28,7 +28,7 @@ $builder->addAll();
 $builder->addFrozenImage('bigm/base-deb-minimal');
 
 /** it is possible to generated dot file for http://www.graphviz.org/  */
-$builder->toDot('/tmp/tree.dot');
+$builder->toDot('/tmp/images-tree.dot');
 
 /** 6. build **/
 //$builder->markAsBuild();
@@ -313,11 +313,19 @@ class DockerBuilder
     public function toDot($fileName)
     {
         // generate dot file
+
         $l = [];
         $l[] = <<<EOF
 digraph images {
-	ratio = fill;
-	node [style=filled];
+    size="36,36";
+    node [color=grey, style=filled];
+	node [fontname="Verdana", size="30,30"];
+    graph [ fontname = "Arial",
+        fontsize = 36,
+            style = "bold",
+            label = "\nto date: November 30th, 2008\n",
+        ssize = "30,60"
+    ];
 EOF;
 
         foreach ($this->_getSanitizedList() as $imageName => $parent) {
@@ -332,6 +340,8 @@ EOF;
 
         $l = implode("\n", $l);
         file_put_contents($fileName, $l);
+        $tmp = substr($fileName, 0, -strlen(pathinfo($fileName, PATHINFO_FILENAME))) . '.gif';
+        DockerBuilder::warn("dot -Tgif -Goverlap=false -o $tmp $fileName");
         die;
     }
 }
