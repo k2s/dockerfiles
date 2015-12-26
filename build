@@ -1,31 +1,43 @@
 #!/usr/bin/env php
 <?php
-// TODO read this configuration from INI file
-// TODO support tagging
+// parse command line arguments
 
-/** 1. create builder instance **/
-// TODO add support for ~/
+// load INI files
+// TODO load multiple INI files
+$cfg = parse_ini_file('./build.ini');
+
 $builder = DockerBuilder::factory();
+foreach ($cfg as $section => $def) {
+    foreach ($def as $k => $v) {
+        switch ($section) {
+            case 'root':
+                $builder->addRootFolder(DockerBuilder::realpath($k), $v);
+                break;
+            case 'repository':
+                $builder->addRepository($k, $v);
+                break;
+            case 'add':
+                if ($k === '*') {
+                    $builder->addAll();
+                } else {
+                    if ($v === '*') {
+                        $builder->addUpTo($k);
+                    } else {
+                        $builder->add($k);
+                    }
+                }
+                break;
+            case 'freeze':
+                $builder->addFrozenImage($v);
+                break;
+            default:
+                DockerBuilder::info("ignoring key '$section'");
+        }
+    }
+}
+die;
 
-/** 2. add at least one root folder where subfolders contain Dockerfile **/
-// TODO user should be overidable with comment in Dockerfile
-$builder->addRootFolder(dirname(__FILE__), 'bigm');
-
-/** 3. configure repository aliases **/
-// TODO repo should be represented as class and we need to support login, file system, etc.
-$builder->setRepository('hub', '');
-$builder->setRepository('quay', 'quay.io');
-
-/** 4. include images to process **/
-// single image
-$builder->add('bigm/monitor-icinga2');
-// image and all it's parent images (up to first frozen image)
-$builder->addUpTo('bigm/monitor-icinga2');
-// the whole image tree found in root folders
-$builder->addAll();
-
-/** 5. froze processing on some images **/
-$builder->addFrozenImage('bigm/base-deb-minimal');
+// execute actions
 
 /** it is possible to generated dot file for http://www.graphviz.org/  */
 $builder->toDot('/tmp/images-tree.dot');
@@ -37,25 +49,7 @@ $builder->build();
 /** 7. push **/
 $builder->push();
 
-//// build single image
-//$builder->build('bigm/base-deb');
-
-//// build all image and all parent images before
-// it is possible to define up to what parent the build process should bubble
-//
-// start building all images related to bigm/base-deb-tools, including bigm/base-deb-tools
-//$builder->buildUpTo('bigm/base-deb-tools');
-
-
-///
-//$builder->buildAll();
-
-//$builder->build('bigm/monitor-icinga2');
-//$builder->buildUpTo('bigm/monitor-icinga2');
-
-
-//// build*() methods remember what images were builded and we will upload them now
-//$builder->push();
+DockerBuilder::info("done.");
 
 /////////////////////////////////////////////////////////////
 class DockerBuilder
@@ -83,10 +77,24 @@ class DockerBuilder
         $this->_tempDir = sys_get_temp_dir();
     }
 
+    public static function realpath($path)
+    {
+        if (0 === strpos($path, '~')) {
+            $path = getenv('HOME') . DIRECTORY_SEPARATOR . substr($path, 1);
+        }
+        return realpath($path);
+    }
+
     public static function warn($string)
     {
         echo "W: $string" . PHP_EOL;
     }
+
+    public static function info($string)
+    {
+        echo "I: $string" . PHP_EOL;
+    }
+
 
     function __destruct()
     {
@@ -111,12 +119,12 @@ class DockerBuilder
     function addRootFolder($folder, $user)
     {
         foreach (array_filter(glob($folder . '/*'), 'is_dir') as $dir) {
-            $this->_images[$user . '/' . basename($dir)] = $dir;
+            $this->_images[$user . DIRECTORY_SEPARATOR . basename($dir)] = $dir;
         }
 
     }
 
-    function setRepository($alias, $repo)
+    function addRepository($alias, $repo)
     {
         $this->_repos[$alias] = $repo;
     }
@@ -313,6 +321,7 @@ class DockerBuilder
     public function toDot($fileName)
     {
         // generate dot file
+        $fileName = DockerBuilder::realpath($fileName);
 
         $l = [];
         $l[] = <<<EOF
@@ -408,7 +417,7 @@ class DockerFile
         }
 
         $name = escapeshellarg($this->_name);
-        $folder = escapeshellarg($this->_folder . '/');
+        $folder = escapeshellarg($this->_folder . DIRECTORY_SEPARATOR);
         $nocache = ""; // --no-cache
 
         switch ($this->getWantedLayers()) {
@@ -455,13 +464,13 @@ class DockerFile
 
     public function setCachedTs()
     {
-        $buildTsFn = $this->_folder . '/' . DockerBuilder::INFO_FILE;
+        $buildTsFn = $this->_folder . DIRECTORY_SEPARATOR . DockerBuilder::INFO_FILE;
         file_put_contents($buildTsFn, $this->getContextTs());
     }
 
     public function getCachedTs()
     {
-        $buildTsFn = $this->_folder . '/' . DockerBuilder::INFO_FILE;
+        $buildTsFn = $this->_folder . DIRECTORY_SEPARATOR . DockerBuilder::INFO_FILE;
         return file_exists($buildTsFn) ? file_get_contents($buildTsFn) : false;
     }
 
@@ -474,7 +483,7 @@ class DockerFile
             } else {
                 // TODO $repo shuld be object and it should handle push steps
                 $name = escapeshellarg($this->_name);
-                $targetName = escapeshellarg(($repo ? $repo . '/' : '') . $this->_name);
+                $targetName = escapeshellarg(($repo ? $repo . DIRECTORY_SEPARATOR : '') . $this->_name);
                 $this->_exec("docker tag -f $name $targetName");
                 $this->_exec("docker push $targetName");
             }
@@ -533,8 +542,8 @@ class DockerFile
     {
         $ts = 0;
         $files = $this->getContextFiles();
-        if (array_key_exists($this->_folder . '/' . DockerBuilder::INFO_FILE, $files)) {
-            unset($files[$this->_folder . '/' . DockerBuilder::INFO_FILE]);
+        if (array_key_exists($this->_folder . DIRECTORY_SEPARATOR . DockerBuilder::INFO_FILE, $files)) {
+            unset($files[$this->_folder . DIRECTORY_SEPARATOR . DockerBuilder::INFO_FILE]);
         }
         foreach ($files as $file) {
             $ts = max($ts, filemtime($file));
@@ -620,7 +629,7 @@ class ImageName
     public function getName()
     {
         // TODO not correct
-        return $this->user . '/' . $this->name;
+        return $this->user . DIRECTORY_SEPARATOR . $this->name;
     }
 
     public function __toString()
@@ -633,3 +642,5 @@ class DockerException extends Exception
 {
 
 }
+
+// TODO support tagging
