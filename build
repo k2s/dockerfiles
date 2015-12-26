@@ -1,6 +1,15 @@
 #!/usr/bin/env php
 <?php
 // parse command line arguments
+$opt = getopt("he:c::", array('build', 'push', 'markAsBuild', 'list'));
+if (false===$opt) {
+    help();
+    exit(1);
+}
+if (array_key_exists('h', $opt)) {
+    help();
+    exit(0);
+}
 
 // load INI files
 // TODO load multiple INI files
@@ -50,6 +59,10 @@ $builder->build();
 $builder->push();
 
 DockerBuilder::info("done.");
+
+function help() {
+
+}
 
 /////////////////////////////////////////////////////////////
 class DockerBuilder
