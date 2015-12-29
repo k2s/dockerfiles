@@ -1,12 +1,46 @@
 #!/usr/bin/env php
 <?php
 // parse command line arguments
-$opt = getopt("he:c::", array('build', 'push', 'markAsBuild', 'list'));
-if (false===$opt) {
+$opts = getopt("hlbpe:c:i:", array('help', 'build', 'push', 'list', 'export:', 'image:')); // , 'markAsBuild'
+$optsSame = [
+    'help' => 'h',
+    'export' => 'e',
+    'build' => 'b',
+    'push' => 'p',
+    'list' => 'l',
+    'image' => 'i'
+];
+function help()
+{
+    $a = array(
+        ['-h, --help', 'print this help text'],
+        ['-c <config file>', 'load additional config file(s)'],
+        ['-i <image name>, --image <image name>', 'list images to process'],
+        ['-l, --list', 'print images to be processed'],
+        ['-e <dot file>, --export <dot file>', 'print this help text'],
+        ['-b, --build', 'build registered images or only image specified as value'],
+        ['-p, --push', 'push registered images or only image specified as value']
+    );
+
+    DockerBuilder::printOut("Usage: build [OPTION]...");
+    DockerBuilder::printOut();
+    foreach ($a as $b) {
+        DockerBuilder::printOut("  $b[0]\t$b[1]");
+    }
+
+}
+
+if (false === $opts) {
     help();
     exit(1);
 }
-if (array_key_exists('h', $opt)) {
+foreach ($optsSame as $k => $v) {
+    if (array_key_exists($k, $opts)) {
+        $opts[$v] = $opts[$k];
+        unset($opts[$k]);
+    }
+}
+if (array_key_exists('h', $opts)) {
     help();
     exit(0);
 }
@@ -20,7 +54,7 @@ foreach ($cfg as $section => $def) {
     foreach ($def as $k => $v) {
         switch ($section) {
             case 'root':
-                $builder->addRootFolder(DockerBuilder::realpath($k), $v);
+                $builder->addRootFolder(DockerBuilder::fixPath($k), $v);
                 break;
             case 'repository':
                 $builder->addRepository($k, $v);
@@ -44,25 +78,46 @@ foreach ($cfg as $section => $def) {
         }
     }
 }
-die;
 
-// execute actions
+// execute command line actions
 
-/** it is possible to generated dot file for http://www.graphviz.org/  */
-$builder->toDot('/tmp/images-tree.dot');
+if (array_key_exists('i', $opts)) {
+    /** limit to images */
+    if (!is_array($opts['i'])) {
+        $opts['i'] = [$opts['i']];
+    }
+    $builder->clear();
+    foreach ($opts['i'] as $image) {
+        $builder->add($image);
+    }
+}
 
-/** 6. build **/
-//$builder->markAsBuild();
-$builder->build();
 
-/** 7. push **/
-$builder->push();
+if (array_key_exists('e', $opts)) {
+    /** it is possible to generated dot file for http://www.graphviz.org/  */
+    $builder->toDot($opts['e']);
+}
+
+if (array_key_exists('l', $opts)) {
+    /** list images loaded from registered roots  */
+    $builder->listImages();
+}
+
+if (array_key_exists('b', $opts)) {
+    /** build **/
+    $builder->build();
+    //$builder->markAsBuild();
+//
+}
+
+if (array_key_exists('p', $opts)) {
+    /** push **/
+//    $builder->push();
+}
+
 
 DockerBuilder::info("done.");
 
-function help() {
-
-}
 
 /////////////////////////////////////////////////////////////
 class DockerBuilder
@@ -90,13 +145,19 @@ class DockerBuilder
         $this->_tempDir = sys_get_temp_dir();
     }
 
-    public static function realpath($path)
+    public static function fixPath($path)
     {
         if (0 === strpos($path, '~')) {
             $path = getenv('HOME') . DIRECTORY_SEPARATOR . substr($path, 1);
         }
-        return realpath($path);
+        return $path;
     }
+
+    public static function printOut($string = '')
+    {
+        echo $string . PHP_EOL;
+    }
+
 
     public static function warn($string)
     {
@@ -173,6 +234,11 @@ class DockerBuilder
                 $imageName = $dockerFile->getParent();
             }
         };
+    }
+
+    function clear()
+    {
+        $this->_readyToProcess = array();
     }
 
     function add($imageName)
@@ -274,7 +340,7 @@ class DockerBuilder
         $images = [];
         foreach ($tree as $imageName => $parent) {
             $parent = is_object($parent) ? $parent->getName() : $parent;
-            if ($parent === $forParent) {
+            if ($parent['p'] === $forParent) {
                 // TODO could be optimized by removing processed items from $tree
                 $images = array_merge($images, [$imageName], $this->_getChildrenFor($tree, $imageName));
             }
@@ -334,7 +400,7 @@ class DockerBuilder
     public function toDot($fileName)
     {
         // generate dot file
-        $fileName = DockerBuilder::realpath($fileName);
+        $fileName = DockerBuilder::fixPath($fileName);
 
         $l = [];
         $l[] = <<<EOF
@@ -363,8 +429,19 @@ EOF;
         $l = implode("\n", $l);
         file_put_contents($fileName, $l);
         $tmp = substr($fileName, 0, -strlen(pathinfo($fileName, PATHINFO_FILENAME))) . '.gif';
-        DockerBuilder::warn("dot -Tgif -Goverlap=false -o $tmp $fileName");
-        die;
+        DockerBuilder::info("dot -Tgif -Goverlap=false -o $tmp $fileName");
+    }
+
+    public function listImages()
+    {
+        foreach ($this->_getSanitizedList() as $imageName => $parent) {
+            if ($parent['p']) {
+                self::printOut("$imageName ($parent[p])");
+            } else {
+                // TODO get one more parent
+                self::printOut($imageName);
+            }
+        }
     }
 }
 
