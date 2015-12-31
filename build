@@ -306,7 +306,8 @@ class DockerBuilder
     function getFlatImageList()
     {
         // flatten tree into correctly ordered list
-        $tree = $this->getTreeImageList();
+//        $tree = $this->getTreeImageList();
+        $tree = $this->_getSanitizedList();
 
         // flatten tree
         return $this->_getChildrenFor($tree, null);
