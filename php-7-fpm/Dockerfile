@@ -28,7 +28,7 @@ RUN /xt/tools/_apt_install $PHP_EXTRA_BUILD_DEPS \
 
 RUN gpg --keyserver pool.sks-keyservers.net --recv-keys 6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3 0BD78B5F97500D450838F95DFE857D9A90D90EC1 1A4E8B7277C42E53DBA9C7B9BCAA30EA9C0D5763
 
-ENV PHP_VERSION 7.0.1
+ENV PHP_VERSION 7.0.2
 
 COPY compile-php.sh /tmp/compile-php.sh
 RUN /tmp/compile-php.sh && rm /tmp/compile-php.sh
