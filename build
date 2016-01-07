@@ -358,7 +358,11 @@ class DockerBuilder
         }
     }
 
-    function _getDockerFile($imageName)
+    public static function getDockerFile($imageName) {
+        return self::$_instance->_getDockerFile($imageName);
+    }
+
+    protected function _getDockerFile($imageName)
     {
         if (!is_object($imageName)) {
             $imageName = new ImageName($imageName);
@@ -450,6 +454,9 @@ class DockerFile
 {
     private $_name;
     private $_folder;
+    /**
+     * @var ImageName
+     */
     private $_parent;
     private $_wantedLayersbuildMethod = 'build';
     private $_repoAliases;
@@ -501,8 +508,16 @@ class DockerFile
             if (false !== $tsOld) {
                 $ts = $this->getContextTs();
                 if ($ts == $tsOld) {
-                    // nothing to rebuild
-                    return;
+                    // let us check also parent
+                    try {
+                        $dockerFile = DockerBuilder::getDockerFile($this->getParent());
+                    } catch (Exception $ex) {
+                        $dockerFile = null;
+                    }
+                    if ($dockerFile && $ts >= $dockerFile->getCachedTs()) {
+                        // nothing to rebuild
+                        return;
+                    }
                 }
             }
         }
