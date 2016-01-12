@@ -28,7 +28,7 @@ RUN /xt/tools/_apt_install zsh \
 RUN /xt/tools/_apt_install docker.io
 
 # install Go language
-RUN mkdir /goroot && curl https://storage.googleapis.com/golang/go1.5.2.linux-amd64.tar.gz | tar xvzf - -C /goroot --strip-components=1N
+RUN mkdir /goroot && curl https://storage.googleapis.com/golang/go1.5.2.linux-amd64.tar.gz | tar xvzf - -C /goroot --strip-components=1
 RUN mkdir /gopath
 ENV GOROOT /goroot
 ENV GOPATH /gopath
