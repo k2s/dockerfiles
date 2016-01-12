@@ -503,6 +503,7 @@ class DockerFile
 
     public function build($force = false)
     {
+        $ts =null;
         if (!$force) {
             $tsOld = $this->getCachedTs();
             if (false !== $tsOld) {
@@ -565,13 +566,16 @@ class DockerFile
         }
 
         // write time stamp
-        $this->setCachedTs();
+        $this->setCachedTs($ts);
     }
 
-    public function setCachedTs()
+    public function setCachedTs($ts)
     {
+        if ($ts === false || is_null($ts)) {
+            $ts = $this->getContextTs();
+        }
         $buildTsFn = $this->_folder . DIRECTORY_SEPARATOR . DockerBuilder::INFO_FILE;
-        file_put_contents($buildTsFn, $this->getContextTs());
+        file_put_contents($buildTsFn, $ts);
     }
 
     public function getCachedTs()
