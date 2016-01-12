@@ -1,3 +1,4 @@
+#BUILD_PUSH=quay
 FROM bigm/base-deb-tools
 
 # git
@@ -27,7 +28,7 @@ RUN /xt/tools/_apt_install zsh \
 RUN /xt/tools/_apt_install docker.io
 
 # install Go language
-RUN mkdir /goroot && curl https://storage.googleapis.com/golang/go1.5.2.linux-amd64.tar.gz | tar xvzf - -C /goroot --strip-components=1
+RUN mkdir /goroot && curl https://storage.googleapis.com/golang/go1.5.2.linux-amd64.tar.gz | tar xvzf - -C /goroot --strip-components=1N
 RUN mkdir /gopath
 ENV GOROOT /goroot
 ENV GOPATH /gopath
@@ -66,7 +67,7 @@ RUN wget -nv https://github.com/coreos/fleet/releases/download/v${VERSION_FLEET}
 #ENV FLEETCTL_ENDPOINT http://10.1.42.1:4001
 
 # etcdctl - https://github.com/coreos/etcd/releases
-ENV VERSION_ETCD 2.2.2
+ENV VERSION_ETCD 2.2.3
 WORKDIR /tmp
 RUN wget -nv https://github.com/coreos/etcd/releases/download/v${VERSION_ETCD}/etcd-v${VERSION_ETCD}-linux-amd64.tar.gz && \
   tar -xvf etcd-v${VERSION_ETCD}-linux-amd64.tar.gz && \
