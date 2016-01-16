@@ -9,8 +9,14 @@ ENV XT_CACHE_REBUILD 3
 ENV DEBIAN_FRONTEND noninteractive
 
 # Keep upstart from complaining
+# see https://github.com/dotcloud/docker/issues/1024
 RUN dpkg-divert --local --rename --add /sbin/initctl \
     && ln -sf /bin/true /sbin/initctl
+
+# Replace the 'ischroot' tool to make it always return true.
+# Prevent initscripts updates from breaking /dev/shm.
+RUN dpkg-divert --local --rename --add /usr/bin/ischroot \
+    && ln -sf /bin/true /usr/bin/ischroot
 
 # copy tool scripts needed in this Dockerfile
 COPY tools/_apt_install /xt/tools/_apt_install
