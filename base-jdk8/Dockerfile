@@ -1,3 +1,4 @@
+#BUILD_PUSH=quay
 FROM bigm/base-deb
 
 #= oracle_jdk8

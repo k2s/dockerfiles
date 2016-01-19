@@ -26,5 +26,5 @@ ADD supervisor/* /etc/supervisord.d/
 
 # expose ports
 EXPOSE 9306 9312
-# hwere index data are stored
+# here index data are stored
 VOLUME ["/var/lib/sphinxsearch"]

@@ -51,6 +51,9 @@ $cfg = parse_ini_file('./build.ini');
 
 $builder = DockerBuilder::factory();
 foreach ($cfg as $section => $def) {
+    if (!is_array($def)) {
+        $def = explode(' ', $def);
+    }
     foreach ($def as $k => $v) {
         switch ($section) {
             case 'root':
@@ -68,6 +71,34 @@ foreach ($cfg as $section => $def) {
                     } else {
                         $builder->add($k);
                     }
+                }
+                break;
+            case 'limit':
+                if (!array_key_exists('i', $opts)) {
+                    $opts['i'] = [];
+                }
+                $opts['i'][] = $v;
+                break;
+            case 'action':
+                switch ($k) {
+                    case 'build':
+                        if ($v) {
+                            $opts['b'] = true;
+                        }
+                        break;
+                    case 'push':
+                        if ($v) {
+                            $opts['p'] = true;
+                        }
+                        break;
+                    case 'list':
+                        if ($v) {
+                            $opts['l'] = true;
+                        }
+                        break;
+                    case 'export':
+                        $opts['e'] = $v;
+                        break;
                 }
                 break;
             case 'freeze':
@@ -112,7 +143,7 @@ if (array_key_exists('b', $opts)) {
 
 if (array_key_exists('p', $opts)) {
     /** push **/
-//    $builder->push();
+    $builder->push();
 }
 
 
@@ -306,7 +337,8 @@ class DockerBuilder
     function getFlatImageList()
     {
         // flatten tree into correctly ordered list
-        $tree = $this->getTreeImageList();
+//        $tree = $this->getTreeImageList();
+        $tree = $this->_getSanitizedList();
 
         // flatten tree
         return $this->_getChildrenFor($tree, null);
@@ -357,7 +389,12 @@ class DockerBuilder
         }
     }
 
-    function _getDockerFile($imageName)
+    public static function getDockerFile($imageName)
+    {
+        return self::$_instance->_getDockerFile($imageName);
+    }
+
+    protected function _getDockerFile($imageName)
     {
         if (!is_object($imageName)) {
             $imageName = new ImageName($imageName);
@@ -434,12 +471,16 @@ EOF;
 
     public function listImages()
     {
+        self::printOut("** image list");
         foreach ($this->_getSanitizedList() as $imageName => $parent) {
+            $sep = str_repeat(' ', 50 - strlen($imageName));
             if ($parent['p']) {
-                self::printOut("$imageName ($parent[p])");
+                self::printOut("$imageName $sep<- $parent[p]");
             } else {
-                // TODO get one more parent
-                self::printOut($imageName);
+                // get parent from Dockerfile
+                $dockerFile = DockerBuilder::getDockerFile($imageName);
+                $parent = $dockerFile->getParent()->getName();
+                self::printOut("$imageName $sep|- $parent");
             }
         }
     }
@@ -449,6 +490,9 @@ class DockerFile
 {
     private $_name;
     private $_folder;
+    /**
+     * @var ImageName
+     */
     private $_parent;
     private $_wantedLayersbuildMethod = 'build';
     private $_repoAliases;
@@ -495,20 +539,36 @@ class DockerFile
 
     public function build($force = false)
     {
+        // get timestamp a while before sending context to Docker
+        $stamp = $this->getStampInfo();
+        $ts = null;
+        $parentStamp = null;
+
+        // evaluate if we need to build the image based on information we know
         if (!$force) {
-            $tsOld = $this->getCachedTs();
-            if (false !== $tsOld) {
+            if (false !== $stamp['ts']) {
                 $ts = $this->getContextTs();
-                if ($ts == $tsOld) {
-                    // nothing to rebuild
-                    return;
+                if ($ts == $stamp['ts']) {
+                    // let us check also parent
+                    $parentStamp = $this->getParentStamp();
+                    if ($parentStamp === $stamp['parent']) {
+                        // nothing to rebuild
+                        return;
+                    }
                 }
             }
         }
+        $stamp['ts'] = $ts ? $ts : $this->getContextTs();
+        $stamp['parent'] = $parentStamp ? $parentStamp : $this->getParentStamp();
 
         $name = escapeshellarg($this->_name);
         $folder = escapeshellarg($this->_folder . DIRECTORY_SEPARATOR);
         $nocache = ""; // --no-cache
+
+        $stars = str_repeat("*", strlen($name) + 19);
+        DockerBuilder::printOut($stars);
+        DockerBuilder::printOut("* building $name image *");
+        DockerBuilder::printOut($stars);
 
         switch ($this->getWantedLayers()) {
             case "single":
@@ -549,19 +609,54 @@ class DockerFile
         }
 
         // write time stamp
-        $this->setCachedTs();
+        $this->setStampInfo($stamp);
     }
 
-    public function setCachedTs()
+    public function setCachedTs($ts)
     {
+        if ($ts === false || is_null($ts)) {
+            $ts = $this->getContextTs();
+        }
         $buildTsFn = $this->_folder . DIRECTORY_SEPARATOR . DockerBuilder::INFO_FILE;
-        file_put_contents($buildTsFn, $this->getContextTs());
+        file_put_contents($buildTsFn, $ts);
     }
 
     public function getCachedTs()
     {
         $buildTsFn = $this->_folder . DIRECTORY_SEPARATOR . DockerBuilder::INFO_FILE;
         return file_exists($buildTsFn) ? file_get_contents($buildTsFn) : false;
+    }
+
+    private function getParentStamp()
+    {
+        // TODO in v2 we should use digest
+        $img = exec('docker images --no-trunc --digests -q ' . $this->getParent()->getName());
+        return $img;
+//        try {
+//            $dockerFile = DockerBuilder::getDockerFile($this->getParent());
+//        } catch (Exception $ex) {
+//            $dockerFile = null;
+//        }
+//        if ($dockerFile) {
+//            $info = BuilderInfo::load($dockerFile->_folder . DIRECTORY_SEPARATOR . DockerBuilder::INFO_FILE);
+//            return $info->ts;
+//        }
+//
+//        return null;
+    }
+
+    private function getStampInfo()
+    {
+        $info = BuilderInfo::load($this->_folder . DIRECTORY_SEPARATOR . DockerBuilder::INFO_FILE);
+        return [
+            'ts' => $info->ts,
+            'parent' => $info->parent,
+        ];
+    }
+
+    private function setStampInfo($stamp)
+    {
+        BuilderInfo::update($this->_folder . DIRECTORY_SEPARATOR . DockerBuilder::INFO_FILE, $stamp);
     }
 
     public function push()
@@ -646,8 +741,20 @@ class DockerFile
     {
         // based on http://stackoverflow.com/questions/19981583/php-filtering-files-and-paths-according-gitignore
         $dir = $this->_folder;
-        $matches = glob("$dir/*");
-        $lines = file_exists($dir . '/.dockerignore') ? file($dir . '/.dockerignore') : [];
+        $matches = [];
+        // TODO we need to do nested directory search !!!
+        foreach (glob("$dir/{,.}*", GLOB_BRACE) as $m) {
+            if (!in_array($m, ["$dir/.", "$dir/..", "$dir/.dockerignore", "$dir/" . DockerBuilder::INFO_FILE])) {
+                $matches[] = $m;
+            }
+        };
+
+
+        if (file_exists($dir . '/.dockerignore')) {
+            $lines = file($dir . '/.dockerignore');
+        } else {
+            $lines = [];
+        }
         foreach ($lines as $line) {
             $line = trim($line);
             if ($line === '') continue;                 # empty line
@@ -719,7 +826,7 @@ class ImageName
     public function getName()
     {
         // TODO not correct
-        return $this->user . DIRECTORY_SEPARATOR . $this->name;
+        return ($this->user ? $this->user . DIRECTORY_SEPARATOR : '') . $this->name . ($this->tag ? ':' . $this->tag : '');
     }
 
     public function __toString()
@@ -731,6 +838,52 @@ class ImageName
 class DockerException extends Exception
 {
 
+}
+
+class BuilderInfo
+{
+    /**
+     * Timestamp of latest changed file in context
+     * @var
+     */
+    var $ts;
+    /**
+     * Unique digest value of the image
+     * @var
+     */
+    var $digest;
+    /**
+     * Unique digest value of the parent image on last build
+     * @var
+     */
+    var $parent;
+
+    public static function load($buildTsFn)
+    {
+        $lines = @file($buildTsFn);
+        $r = new self();
+        $r->ts = count($lines) > 0 ? trim($lines[0]) : null;
+        $r->parent = count($lines) > 1 ? trim($lines[1]) : null;
+
+        return $r;
+    }
+
+    public static function update($buildTsFn, $values)
+    {
+        $info = self::load($buildTsFn);
+        foreach ($values as $k => $v) {
+            $info->$k = $v;
+        }
+        $info->save($buildTsFn);
+    }
+
+    public function save($buildTsFn)
+    {
+        $f = fopen($buildTsFn, "w");
+        fputs($f, $this->ts . "\n");
+        fputs($f, $this->parent . "\n");
+        fclose($f);
+    }
 }
 
 // TODO support tagging

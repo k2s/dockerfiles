@@ -1,3 +1,4 @@
+#BUILD_PUSH=quay
 FROM bigm/base-deb-tools
 
 # compile PHP 7.0 (cli and fpm)
@@ -27,7 +28,7 @@ RUN /xt/tools/_apt_install $PHP_EXTRA_BUILD_DEPS \
 
 RUN gpg --keyserver pool.sks-keyservers.net --recv-keys 6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3 0BD78B5F97500D450838F95DFE857D9A90D90EC1 1A4E8B7277C42E53DBA9C7B9BCAA30EA9C0D5763
 
-ENV PHP_VERSION 7.0.0
+ENV PHP_VERSION 7.0.2
 
 COPY compile-php.sh /tmp/compile-php.sh
 RUN /tmp/compile-php.sh && rm /tmp/compile-php.sh
@@ -58,7 +59,7 @@ RUN /xt/tools/php_compile_extension gd --with-png-dir=/usr --with-jpeg-dir=/usr 
 #mysql ?
 #mysqli ?
 
-RUN yes "" | pecl install xdebug-2.4.0RC2 \
+RUN yes "" | pecl install xdebug-2.4.0RC3 \
 		&& echo "zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20151012/xdebug.so" > /usr/local/etc/ext-xdebug.ini \
     && echo "xdebug.remote_enable = on" >> /usr/local/etc/ext-xdebug.ini \
     && echo "xdebug.remote_connect_back = on" >> /usr/local/etc/ext-xdebug.ini \
@@ -74,18 +75,8 @@ RUN yes "" | pecl install APCu \
 	&& echo "extension=apc.so" >> /usr/local/etc/php/conf.d/ext-apcu.ini
 
 RUN /xt/tools/_apt_install libmagickwand-dev git \
-	&& yes "" | pecl install imagick-3.4.0RC2 \
+	&& yes "" | pecl install imagick-3.4.0RC4 \
 	&& echo "extension=imagick.so" > /usr/local/etc/php/conf.d/ext-imagick.ini
-
-#TODO we have to replace mongo driver with mongodb under 7
-#TODO mongodb not compiling under 7 - https://jira.mongodb.org/browse/PHPC-285
-#RUN	yes "" | pecl install mongodb \
-#	&& echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/ext-mongo.ini
-RUN /xt/tools/_apt_install libsasl2-dev \
-    && cd /tmp && git clone -b PHP7 https://github.com/mongodb-labs/mongo-php-driver-prototype.git && cd /tmp/mongo-php-driver-prototype \
-    && git submodule update --init && phpize && ./configure && make -j"$(nproc)" all && make install \
-    && rm -rf /tmp/mongo-php-driver-prototype \
-    && echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/ext-mongo.ini
 
 #TODO ssh2 not compiling under 7
 #RUN yes "" | pecl install ssh2-0.12 \
@@ -116,10 +107,10 @@ RUN /xt/tools/_enable_ssmtp \
 # another PDF tool
 RUN /xt/tools/_apt_install pdftk
 
-COPY etc/php-fpm.conf /usr/local/etc/
-COPY etc/fpm.d/* /usr/local/etc/fpm.d/
-COPY startup/* /xt/startup/
-ADD supervisor/* /etc/supervisord.d/
+ADD root/ /
+ADD startup/* /xt/startup/
+ADD supervisor.d/* /etc/supervisord.d/
+
 
 RUN mkdir -p /var/www/html
 WORKDIR /var/www
@@ -151,12 +142,16 @@ EXPOSE 9000
 #	&& make install \
 #	&& echo "extension=igbinary.so" > /usr/local/etc/php/conf.d/ext-igbinary.ini \
 #	&& echo "extension=memcached.so" > /usr/local/etc/php/conf.d/ext-memcached.ini
-RUN cd /tmp && git clone -b php7 https://github.com/Sean-Der/igbinary.git && cd /tmp/igbinary \
+RUN cd /tmp && git clone https://github.com/igbinary/igbinary7.git && cd /tmp/igbinary7 \
     && phpize && ./configure CFLAGS="-O2 -g" --enable-igbinary && make && make install \
-    && rm -rf /tmp/igbinary \
+    && rm -rf /tmp/igbinary7 \
     && echo "extension=igbinary.so" > /usr/local/etc/php/conf.d/ext-igbinary.ini
 RUN /xt/tools/_apt_install libmemcached-dev \
     && cd /tmp && git clone -b php7 https://github.com/php-memcached-dev/php-memcached && cd /tmp/php-memcached \
     && phpize && ./configure --disable-memcached-sasl && make && make install \
     && rm -rf /tmp/php-memcached \
     && echo "extension=memcached.so" > /usr/local/etc/php/conf.d/ext-memcached.ini
+
+#TODO we have to replace mongo driver with mongodb under 7
+RUN	yes "" | pecl install mongodb \
+	&& echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/ext-mongo.ini
