@@ -6,6 +6,7 @@ FROM bigm/base-deb-tools
 RUN /xt/tools/_ppa_install ppa:formorer/icinga \
     apache2-utils php5-cli php5-mysql \
     icinga2 icinga2-ido-mysql \
+    icinga2-classicui \
     icingaweb2 icingaweb2-module-monitoring icingaweb2-module-doc \
     nagios-plugins nagios-plugins-contrib nagios-plugins-extra
 
@@ -68,7 +69,7 @@ ENV ICINGAWEB_MYSQL_DB icinga2
 ENV ICINGAWEB_MYSQL_PORT ""
 ENV ICINGAWEB_MYSQL_FROM "%"
 
-#VOLUME ["/etc/icinga2", "/etc/icingaweb2", "/var/lib/icinga2", "/usr/share/icingaweb2"]
+#VOLUME ["/etc/icinga2", "/etc/icingaweb2", "/etc/icinga2-classicui", "/var/lib/icinga2", "/usr/share/icingaweb2"]
 
 # folders under /xt/defaults will be populated in instance if they are empty
 RUN mkdir -p /xt/defaults/etc \
