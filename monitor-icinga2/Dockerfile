@@ -74,6 +74,7 @@ ENV ICINGAWEB_MYSQL_FROM "%"
 # folders under /xt/defaults will be populated in instance if they are empty
 RUN mkdir -p /xt/defaults/etc \
     && cp -rp /etc/icinga2 /xt/defaults/etc/icinga2 \
-    && cp -rp /etc/icingaweb2 /xt/defaults/etc/icingaweb2
+    && cp -rp /etc/icingaweb2 /xt/defaults/etc/icingaweb2 \
+    && cp -rp /etc/icinga2-classicui /xt/defaults/etc/icinga2-classicui
 
 # TODO graphite support
