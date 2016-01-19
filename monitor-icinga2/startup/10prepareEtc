@@ -10,6 +10,11 @@ if [ ! -f /etc/icingaweb2/config.ini ]; then
     cp -rp /xt/defaults/etc/icingaweb2/. /etc/icingaweb2/
 fi
 
+if [ ! -f /etc/icinga2-classicui/apache2.conf ]; then
+    echo "populate /etc/icinga2-classicui"
+    cp -rp /xt/defaults/etc/icinga2-classicui/. /etc/icinga2-classicui/
+fi
+
 # enable modules
 if [ ! -e /etc/icingaweb2/enabledModules ]; then
     mkdir -p /etc/icingaweb2/enabledModules
