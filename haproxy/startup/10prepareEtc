@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+if [ ! -f /etc/confd/confd.toml ]; then
+    echo "populate /etc/confd"
+    cp -rp /xt/defaults/etc/confd/. /etc/confd/
+fi

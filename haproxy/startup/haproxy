@@ -9,8 +9,8 @@ fi
 echo "lb instance using etcd node: $ETCD_NODE"
 
 ## make sure all needed keys are created
-curl -L -X PUT -d dir=true http://$ETCD_NODE/v2/keys/lb/backends
-curl -L -X PUT -d dir=true http://$ETCD_NODE/v2/keys/lb/domains
+curl -sS -L -X PUT -d dir=true http://$ETCD_NODE/v2/keys/lb/backends
+curl -sS -L -X PUT -d dir=true http://$ETCD_NODE/v2/keys/lb/domains
 
 ## create /etc/haproxy/custom.cfg if not mapped
 if [ ! -f /etc/haproxy/custom.cfg ]; then
