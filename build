@@ -1,11 +1,12 @@
 #!/usr/bin/env php
 <?php
 // parse command line arguments
-$opts = getopt("hlbpe:c:i:", array('help', 'build', 'push', 'list', 'export:', 'image:')); // , 'markAsBuild'
+$opts = getopt("hlbfpe:c:i:", array('help', 'build', 'force', 'push', 'list', 'export:', 'image:')); // , 'markAsBuild'
 $optsSame = [
     'help' => 'h',
     'export' => 'e',
     'build' => 'b',
+    'force' => 'f',
     'push' => 'p',
     'list' => 'l',
     'image' => 'i'
@@ -19,7 +20,8 @@ function help()
         ['-l, --list', 'print images to be processed'],
         ['-e <dot file>, --export <dot file>', 'print this help text'],
         ['-b, --build', 'build registered images or only image specified as value'],
-        ['-p, --push', 'push registered images or only image specified as value']
+        ['-p, --push', 'push registered images or only image specified as value'],
+        ['-f, --force', 'force build of registered images'],
     );
 
     DockerBuilder::printOut("Usage: build [OPTION]...");
@@ -111,6 +113,7 @@ foreach ($cfg as $section => $def) {
 }
 
 // execute command line actions
+$builder->setForceFlag(array_key_exists('f', $opts));
 
 if (array_key_exists('i', $opts)) {
     /** limit to images */
@@ -161,6 +164,7 @@ class DockerBuilder
     private $_tempDir = false;
     private $_tempNames = [];
     private $_readyToProcess = [];
+    private $_forceBuild = false;
 
     public static function factory($tempFolder = false)
     {
@@ -299,7 +303,7 @@ class DockerBuilder
     {
         foreach ($this->getFlatImageList() as $imageName) {
             $dockerFile = $this->_getDockerFile($imageName);
-            $dockerFile->build();
+            $dockerFile->build($this->_forceBuild);
         }
     }
 
@@ -484,6 +488,11 @@ EOF;
             }
         }
     }
+
+    public function setForceFlag($force)
+    {
+        $this->_forceBuild = $force;
+    }
 }
 
 class DockerFile
@@ -563,7 +572,7 @@ class DockerFile
 
         $name = escapeshellarg($this->_name);
         $folder = escapeshellarg($this->_folder . DIRECTORY_SEPARATOR);
-        $nocache = ""; // --no-cache
+        $nocache = $force ? '--no-cache' : '';
 
         $stars = str_repeat("*", strlen($name) + 19);
         DockerBuilder::printOut($stars);
