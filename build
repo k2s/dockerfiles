@@ -87,6 +87,9 @@ foreach ($cfg as $section => $def) {
                         if ($v) {
                             $opts['b'] = true;
                         }
+                        if ($v === 'force') {
+                            $opts['f'] = true;
+                        }
                         break;
                     case 'push':
                         if ($v) {
