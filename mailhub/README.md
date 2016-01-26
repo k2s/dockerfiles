@@ -24,7 +24,7 @@ Send test email:
 
 ##Dynamic reconfiguration
 
-    docker exec mailhub /prj/reconfigure.sh
+    docker exec mailhub /xt/postfix-reconfig.sh
 
 ##DKIM
 
