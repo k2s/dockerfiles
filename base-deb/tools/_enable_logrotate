@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# if you need to use mail command from bash add to Dockerfile: RUN /xt/tools/_apt_install heirloom-mailx
+#
+# alternative solutions: http://untroubled.org/nullmailer/, https://www.sthu.org/code/smailq.html
+
+/xt/tools/_enable_cron
+/xt/tools/_apt_install logrotate
