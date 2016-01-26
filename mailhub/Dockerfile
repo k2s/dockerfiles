@@ -1,4 +1,4 @@
-#BUILD_PUSH=quay
+#BUILD_PUSH=hub,quay
 FROM bigm/base-deb-tools
 # https://github.com/wader/postfix-relay
 # https://registry.hub.docker.com/u/nightexcessive/docker-opendkim/dockerfile/
