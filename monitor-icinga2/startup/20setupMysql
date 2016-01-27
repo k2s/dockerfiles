@@ -55,10 +55,11 @@ EOF
     else
         PORT=""
     fi
-    if [ -z "$ICINGAWEB_INIT" ]; then
-        mysql  --batch --silent --host $ICINGAWEB_MYSQL_HOST $PORT -u $ICINGAWEB_MYSQL_USER -p$ICINGAWEB_MYSQL_PASSWORD $ICINGAWEB_MYSQL_DB \
-            -e "INSERT INTO icingaweb_user (name, active, password_hash) VALUES ('icingaadmin', 1, '\$1\$iQSrnmO9\$T3NVTu0zBkfuim4lWNRmH.') ON DUPLICATE KEY UPDATE password_hash='\$1\$iQSrnmO9\$T3NVTu0zBkfuim4lWNRmH.';"
-    fi
+#    if [ -z "$ICINGAWEB_INIT" ]; then
+#        # TODO reset password to some value passed by ENV variable in the future
+#        mysql  --batch --silent --host $ICINGAWEB_MYSQL_HOST $PORT -u $ICINGAWEB_MYSQL_USER -p$ICINGAWEB_MYSQL_PASSWORD $ICINGAWEB_MYSQL_DB \
+#            -e "INSERT INTO icingaweb_user (name, active, password_hash) VALUES ('icingaadmin', 1, '\$1\$iQSrnmO9\$T3NVTu0zBkfuim4lWNRmH.') ON DUPLICATE KEY UPDATE password_hash='\$1\$iQSrnmO9\$T3NVTu0zBkfuim4lWNRmH.';"
+#    fi
 fi
 
 if [ -z "$ICINGAWEB_INIT" ]; then
