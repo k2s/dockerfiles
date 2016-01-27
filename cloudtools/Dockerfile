@@ -1,4 +1,4 @@
-#BUILD_PUSH=quay
+#BUILD_PUSH=hub,quay
 FROM bigm/base-deb-tools
 
 # git
@@ -83,7 +83,7 @@ RUN ansible-galaxy install defunctzombie.coreos-bootstrap
 RUN /xt/tools/_apt_install nfs-common portmap
 
 # mosh client
-RUN /xt/tools/_apt_install mosh
+RUN /xt/tools/_apt_install mosh sshfs
 
 # final settings
 ENV PATH $PATH:/xt/hosting/bin
