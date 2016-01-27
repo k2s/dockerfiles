@@ -1,3 +1,4 @@
+#BUILD_PUSH=hub,quay
 FROM bigm/base-jdk8
 
 #= openfire

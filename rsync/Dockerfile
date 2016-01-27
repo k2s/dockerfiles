@@ -1,3 +1,4 @@
+#BUILD_PUSH=hub,quay
 FROM bigm/base-deb
 
 # install confd
