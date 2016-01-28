@@ -1,3 +1,4 @@
+#BUILD_PUSH=hub,quay
 FROM bigm/base-deb-tools
 
 RUN /xt/tools/_ppa_install ppa:builds/sphinxsearch-rel22 sphinxsearch

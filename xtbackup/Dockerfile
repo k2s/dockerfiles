@@ -1,4 +1,4 @@
-#BUILD_PUSH=quay
+#BUILD_PUSH=hub,quay
 FROM php:5.6-cli
 
 RUN apt-get update && apt-get install -y libc6-dev \
