@@ -1,3 +1,4 @@
+#BUILD_PUSH=hub,quay
 FROM bigm/base-deb-tools
 
 # VCS
@@ -101,3 +102,9 @@ RUN /xt/tools/_apt_install fetchmail procmail \
 ### enable sending emails from inside of this docker
 RUN /xt/tools/_enable_ssmtp \
     && /xt/tools/_apt_install heirloom-mailx
+
+### the new mongodb extension
+RUN	/xt/tools/_apt_install libcurl4-openssl-dev libpcre3-dev \
+    && yes "" | pecl install mongodb \
+	&& echo "extension=mongodb.so" > /etc/php5/mods-available/mongo.ini \
+	&& php5enmod mongo
