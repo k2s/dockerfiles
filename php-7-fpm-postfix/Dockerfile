@@ -1,4 +1,4 @@
-#BUILD_PUSH=quay
+#BUILD_PUSH=hub,quay
 FROM bigm/php-7-fpm
 
 ### add postfix daemon

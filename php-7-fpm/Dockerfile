@@ -1,4 +1,4 @@
-#BUILD_PUSH=quay
+#BUILD_PUSH=hub,quay
 FROM bigm/base-deb-tools
 
 # compile PHP 7.0 (cli and fpm)
@@ -59,7 +59,7 @@ RUN /xt/tools/php_compile_extension gd --with-png-dir=/usr --with-jpeg-dir=/usr 
 #mysql ?
 #mysqli ?
 
-RUN yes "" | pecl install xdebug-2.4.0RC3 \
+RUN yes "" | pecl install xdebug-2.4.0RC4 \
 		&& echo "zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20151012/xdebug.so" > /usr/local/etc/ext-xdebug.ini \
     && echo "xdebug.remote_enable = on" >> /usr/local/etc/ext-xdebug.ini \
     && echo "xdebug.remote_connect_back = on" >> /usr/local/etc/ext-xdebug.ini \
