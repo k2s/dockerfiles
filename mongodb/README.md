@@ -22,13 +22,13 @@ Command line utility:
 
 ##Environment variables
 
-* MONDODB_OPTS: command line added to `mongod` start command (see `supervisor/mongodb.conf`) 
+* MONGODB_OPTS: command line added to `mongod` start command (see `supervisor/mongodb.conf`) 
 
 To provide more complicated configuration I recommend to mount `/etc/mongodb.conf` and pass
   
     ...
     -v /mymongod.conf:/etc/mongod.conf
-    -e MONDODB_OPTS='--config /etc/mongod.conf'
+    -e MONGODB_OPTS='--config /etc/mongod.conf'
     ...
 
 
