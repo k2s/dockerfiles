@@ -1,3 +1,4 @@
+#BUILD_PUSH=hub,quay
 FROM bigm/devtools
 
 ### web server to publish the tools
@@ -24,15 +25,14 @@ RUN mkdir -p /data/http/fs \
   && rm -f fs.zip \
   && mv Filemanager-master/* ./ \
   && rm -rf Filemanager-master
-ADD filemanager.config.js /data/http/fs/scripts/filemanager.config.js
 
 ### TODO adminer editor
 ### TODO phpmyadmin
 
 ### configuration files
-ADD etc /etc
+ADD root/ /
 ADD startup/* /xt/startup/
-ADD supervisor/* /etc/supervisord.d/
+ADD supervisor.d/* /etc/supervisord.d/
 
 EXPOSE 80
 CMD ["/usr/local/bin/supervisord", "-c",  "/etc/supervisord.conf"]
