@@ -582,6 +582,14 @@ class DockerFile
         DockerBuilder::printOut("* building $name image *");
         DockerBuilder::printOut($stars);
 
+
+        if (file_exists($this->_folder . '/Dockerfile.before.sh')) {
+            $cwd = getcwd();
+            chdir($this->_folder);
+            $this->_exec("./Dockerfile.before.sh");
+            chdir($cwd);
+        }
+
         switch ($this->getWantedLayers()) {
             case "single":
                 // test only: this will miss all Docker directives
@@ -618,6 +626,13 @@ class DockerFile
                 break;
             default:
                 throw new DockerException("unknown build method: " . $this->getWantedLayers());
+        }
+
+        if (file_exists($this->_folder . '/Dockerfile.after.sh')) {
+            $cwd = getcwd();
+            chdir($this->_folder);
+            $this->_exec("./Dockerfile.after.sh");
+            chdir($cwd);
         }
 
         // write time stamp
