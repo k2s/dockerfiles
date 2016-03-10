@@ -1,5 +1,12 @@
 package main
 
+/**
+Based on:
+https://github.com/dakusan/HTTP-Forwarders/blob/master/Go/forward.go
+https://golanglibs.com/dig_in/forwarder?page=4
+https://coreos.com/etcd/docs/latest/getting-started-with-etcd.html
+ */
+
 import (
 	"io"
 	"net/http"
