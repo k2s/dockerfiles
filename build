@@ -508,6 +508,7 @@ class DockerFile
     private $_parent;
     private $_wantedLayersbuildMethod = 'build';
     private $_repoAliases;
+    private $_pushTagFrom;
 
     public function __construct($imageFolder, $imageName)
     {
@@ -536,6 +537,10 @@ class DockerFile
             $this->_repoAliases = explode(',', $m[1]);
         } else {
             $this->_repoAliases = [];
+        }
+
+        if (preg_match('/^#BUILD_PUSH_TAG_FROM=(.+)$/m', $s, $m)) {
+            $this->_pushTagFrom = $m[1];
         }
     }
 
@@ -696,13 +701,31 @@ class DockerFile
                 // TODO $repo shuld be object and it should handle push steps
                 $name = escapeshellarg($this->_name);
                 $targetName = escapeshellarg(($repo ? $repo . DIRECTORY_SEPARATOR : '') . $this->_name);
-                $this->_exec("docker tag -f $name $targetName");
-                $this->_exec("docker push $targetName");
+                $tags = ['latest'];
+                if ($this->_pushTagFrom) {
+                    $json = "";
+                    $this->_exec('docker inspect -f "{{ json .Config.Env }}" ' . $name, $json);
+                    $json = json_decode($json);
+                    $c = $this->_pushTagFrom . '=';
+                    $l = strlen($c);
+                    $json = array_reduce($json, function ($carry, $item) use ($l, $c) {
+                        if (substr($item, 0, $l) === $c) {
+                            return substr($item, $l);
+                        }
+                        return $carry;
+                    });
+                    $tags[] = $json;
+                }
+                foreach ($tags as $tag) {
+                    DockerBuilder::info("process repository tag '$tag'");
+                    $this->_exec("docker tag -f $name $targetName:$tag");
+                    $this->_exec("docker push $targetName:$tag");
+                }
             }
         }
     }
 
-    public function _exec($cmd)
+    public function _exec($cmd, &$out = null)
     {
         // http://stackoverflow.com/questions/692000/how-do-i-write-stderr-to-a-file-while-using-tee-with-a-pipe
 //        $buildLog = fopen("buildLog", "w");
@@ -719,10 +742,14 @@ class DockerFile
 //            fwrite($pipes[0], $plain_text);
 //            fclose($pipes[0]);
             while ($s = fgets($pipes[1], 1024)) {
-                // TODO output only steps
+                if (!is_null($out)) {
+                    $out .= $s;
+                } else {
+                    // TODO output only steps
 //                if (preg_match('/^Step \d+ :/', $s)) {
-                echo $s;
+                    echo $s;
 //                }
+                }
             }
             fclose($pipes[1]);
 
