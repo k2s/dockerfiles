@@ -1,4 +1,5 @@
 #BUILD_PUSH=hub,quay
+#BUILD_PUSH_TAG_FROM=PHP_VERSION
 FROM bigm/base-deb-tools
 
 # compile PHP 7.0 (cli and fpm)
@@ -28,7 +29,7 @@ RUN /xt/tools/_apt_install $PHP_EXTRA_BUILD_DEPS \
 
 RUN gpg --keyserver pool.sks-keyservers.net --recv-keys 6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3 0BD78B5F97500D450838F95DFE857D9A90D90EC1 1A4E8B7277C42E53DBA9C7B9BCAA30EA9C0D5763
 
-ENV PHP_VERSION 7.0.3
+ENV PHP_VERSION 7.0.4
 
 COPY compile-php.sh /tmp/compile-php.sh
 RUN /tmp/compile-php.sh && rm /tmp/compile-php.sh
@@ -59,7 +60,7 @@ RUN /xt/tools/php_compile_extension gd --with-png-dir=/usr --with-jpeg-dir=/usr 
 #mysql ?
 #mysqli ?
 
-RUN yes "" | pecl install xdebug-2.4.0RC4 \
+RUN yes "" | pecl install xdebug-2.4.0 \
 		&& echo "zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20151012/xdebug.so" > /usr/local/etc/ext-xdebug.ini \
     && echo "xdebug.remote_enable = on" >> /usr/local/etc/ext-xdebug.ini \
     && echo "xdebug.remote_connect_back = on" >> /usr/local/etc/ext-xdebug.ini \
@@ -75,7 +76,7 @@ RUN yes "" | pecl install APCu \
 	&& echo "extension=apc.so" >> /usr/local/etc/php/conf.d/ext-apcu.ini
 
 RUN /xt/tools/_apt_install libmagickwand-dev git \
-	&& yes "" | pecl install imagick-3.4.0RC6 \
+	&& yes "" | pecl install imagick-3.4.1 \
 	&& echo "extension=imagick.so" > /usr/local/etc/php/conf.d/ext-imagick.ini
 
 #TODO ssh2 not compiling under 7
