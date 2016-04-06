@@ -156,3 +156,9 @@ RUN /xt/tools/_apt_install libmemcached-dev \
 #TODO we have to replace mongo driver with mongodb under 7
 RUN	yes "" | pecl install mongodb \
 	&& echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/ext-mongo.ini
+
+### TODO temporary fix for https://pear.php.net/bugs/bug.php?id=21020
+COPY SQL_Parser-0.6.0.tgz /tmp
+RUN pear uninstall SQL_Parser \
+    && pear install /tmp/SQL_Parser-0.6.0.tgz \
+    && rm -f /tmp/SQL_Parser-0.6.0.tgz
