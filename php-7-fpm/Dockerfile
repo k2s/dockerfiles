@@ -60,7 +60,7 @@ RUN /xt/tools/php_compile_extension gd --with-png-dir=/usr --with-jpeg-dir=/usr 
 #mysql ?
 #mysqli ?
 
-RUN yes "" | pecl install xdebug-2.4.0 \
+RUN yes "" | pecl install xdebug \
 		&& echo "zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20151012/xdebug.so" > /usr/local/etc/ext-xdebug.ini \
     && echo "xdebug.remote_enable = on" >> /usr/local/etc/ext-xdebug.ini \
     && echo "xdebug.remote_connect_back = on" >> /usr/local/etc/ext-xdebug.ini \
