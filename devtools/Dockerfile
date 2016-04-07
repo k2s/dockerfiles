@@ -108,3 +108,6 @@ RUN	/xt/tools/_apt_install libcurl4-openssl-dev libpcre3-dev \
     && yes "" | pecl install mongodb \
 	&& echo "extension=mongodb.so" > /etc/php5/mods-available/mongo.ini \
 	&& php5enmod mongo
+
+# fix https://github.com/npm/npm/issues/12196
+RUN npm install -g npm@latest-2
