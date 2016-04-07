@@ -79,6 +79,9 @@ foreach ($cfg as $section => $def) {
                 if (!array_key_exists('i', $opts)) {
                     $opts['i'] = [];
                 }
+                if (!is_array($opts['i'])) {
+                    $opts['i'] = [$opts['i']];
+                }
                 $opts['i'][] = $v;
                 break;
             case 'action':
