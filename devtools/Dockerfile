@@ -111,3 +111,4 @@ RUN	/xt/tools/_apt_install libcurl4-openssl-dev libpcre3-dev \
 
 # fix https://github.com/npm/npm/issues/12196
 RUN npm install -g npm@latest-2
+RUN composer self-update
