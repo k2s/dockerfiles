@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
 if [ -n "$PHP_ENABLE_XDEBUG" ]; then
-    ln -s /usr/local/etc/ext-xdebug.ini /usr/local/etc/php/conf.d/ext-xdebug.ini
+    if [ ! -f /usr/local/etc/php/conf.d/ext-xdebug.ini ]; then
+        ln -s /usr/local/etc/ext-xdebug.ini /usr/local/etc/php/conf.d/ext-xdebug.ini
+    fi
 fi
