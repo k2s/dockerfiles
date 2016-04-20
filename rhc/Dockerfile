@@ -1,3 +1,4 @@
+#BUILD_PUSH=hub,quay
 # https://registry.hub.docker.com/_/ruby/
 FROM ruby:latest
 
