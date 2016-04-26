@@ -24,3 +24,7 @@ RUN curl -o aws.tar.gz -SL https://github.com/amazonwebservices/aws-sdk-for-php/
 
 ENV XTBACKUP_OPENDIR ""
 
+RUN apt-get update && apt-get install -y php5-sqlite \
+     && apt-get -y autoremove \
+          && rm -rf /var/lib/apt/lists/*
+
