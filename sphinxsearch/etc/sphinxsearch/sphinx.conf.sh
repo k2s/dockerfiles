@@ -17,7 +17,7 @@ do
 				$fname
 			elif [ -f $fname ]; then
 				echo "# INCLUDE: $fname"
-				perl -p -i -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : $&/eg' < $fname
+				perl -p -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : $&/eg' < $fname
 			fi
 		done
   else

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ -n "$SPHINXSEARCH_STARTUP_INDEXER" ]; then
-  indexer -c /etc/sphinxsearch/sphinx.conf.sh $SPHINXSEARCH_STARTUP_INDEXER
+  bash -c "indexer -c /etc/sphinxsearch/sphinx.conf.sh $SPHINXSEARCH_STARTUP_INDEXER"
 fi
 
 exit 0
