@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 // parse command line arguments
-$opts = getopt("hlbfpe:c:i:", array('help', 'build', 'force', 'push', 'list', 'export:', 'image:')); // , 'markAsBuild'
+$opts = getopt("hlbfpeu:c:i:", array('help', 'build', 'force', 'push', 'list', 'export:', 'image:')); // , 'markAsBuild'
 $optsSame = [
     'help' => 'h',
     'export' => 'e',
@@ -9,19 +9,21 @@ $optsSame = [
     'force' => 'f',
     'push' => 'p',
     'list' => 'l',
-    'image' => 'i'
+    'image' => 'i',
+    'user' => 'u'
 ];
 function help()
 {
     $a = array(
         ['-h, --help', 'print this help text'],
         ['-c <config file>', 'load additional config file(s)'],
-        ['-i <image name>, --image <image name>', 'list images to process'],
+        ['-i <image name>, --image <image name>', 'list images to process, dot will build Dockerfile in current folder'],
         ['-l, --list', 'print images to be processed'],
         ['-e <dot file>, --export <dot file>', 'print this help text'],
         ['-b, --build', 'build registered images or only image specified as value'],
         ['-p, --push', 'push registered images or only image specified as value'],
         ['-f, --force', 'force build of registered images'],
+        ['-u, --user', 'default user name prefixing image names'],
     );
 
     DockerBuilder::printOut("Usage: build [OPTION]...");
@@ -49,7 +51,11 @@ if (array_key_exists('h', $opts)) {
 
 // load INI files
 // TODO load multiple INI files
-$cfg = parse_ini_file('./build.ini');
+$startedInFolder = getcwd();
+if (!file_exists('build.ini')) {
+    chdir(dirname(__FILE__));
+}
+$cfg = parse_ini_file('build.ini');
 
 $builder = DockerBuilder::factory();
 foreach ($cfg as $section => $def) {
@@ -112,6 +118,9 @@ foreach ($cfg as $section => $def) {
             case 'freeze':
                 $builder->addFrozenImage($v);
                 break;
+            case 'user':
+                $builder->setDefaultUser($v);
+                break;
             default:
                 DockerBuilder::info("ignoring key '$section'");
         }
@@ -127,11 +136,16 @@ if (array_key_exists('i', $opts)) {
         $opts['i'] = [$opts['i']];
     }
     $builder->clear();
-    foreach ($opts['i'] as $image) {
-        $builder->add($image);
+
+    if ($opts['i'][0] === '.') {
+        // limit to current folder name if there is Dockerfile
+        $builder->add(basename($startedInFolder));
+    } else {
+        foreach ($opts['i'] as $image) {
+            $builder->add($image);
+        }
     }
 }
-
 
 if (array_key_exists('e', $opts)) {
     /** it is possible to generated dot file for http://www.graphviz.org/  */
@@ -171,6 +185,7 @@ class DockerBuilder
     private $_tempNames = [];
     private $_readyToProcess = [];
     private $_forceBuild = false;
+    private $_prefix = "";
 
     public static function factory($tempFolder = false)
     {
@@ -289,6 +304,9 @@ class DockerBuilder
             $imageName = $imageName->getName();
         } else {
             $dockerFile = false;
+            if (false === strpos($imageName, '/')) {
+                $imageName = $this->_prefix . '/' . $imageName;
+            }
         }
         if (!array_key_exists($imageName, $this->_readyToProcess)) {
             try {
@@ -498,6 +516,11 @@ EOF;
     public function setForceFlag($force)
     {
         $this->_forceBuild = $force;
+    }
+
+    public function setDefaultUser($user)
+    {
+        $this->_prefix = $user;
     }
 }
 
@@ -788,7 +811,9 @@ class DockerFile
             unset($files[$this->_folder . DIRECTORY_SEPARATOR . DockerBuilder::INFO_FILE]);
         }
         foreach ($files as $file) {
-            $ts = max($ts, filemtime($file));
+            if (is_file($file)) {
+                $ts = max($ts, filemtime($file));
+            }
         }
 
         return $ts;
