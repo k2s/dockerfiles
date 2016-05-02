@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -x
+#set -x
 if [ ! -d /usr/src/php ]; then
     mkdir -p /usr/src/php
     tar -xof /php.tar.bz2 -C /usr/src/php --strip-components=1
@@ -8,11 +8,13 @@ fi
 
 ext=$1
 cd "/usr/src/php/ext/$ext"
-phpize
-./configure "${@:2}"
+if [ ! -e Makefile ] ; then
+    phpize
+    ./configure "${@:2}"
+fi
 
-make
-make install
+make -j"$(nproc)"
+make -j"$(nproc)" install
 
 for module in modules/*.so; do
 	if [ -f "$module" ]; then
@@ -29,4 +31,4 @@ for module in modules/*.so; do
 #		fi
 	fi
 done
-make clean
+make -j"$(nproc)" clean
