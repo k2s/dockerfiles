@@ -1,0 +1,39 @@
+diff --git a/build-2.1.1/ngx_http_upstream.c b/ngx_http_upstream.c
+index a218e75..8875a6b 100644
+--- a/build-2.1.1/ngx_http_upstream.c
++++ b/ngx_http_upstream.c
+@@ -22,6 +22,8 @@ static ngx_int_t ngx_http_upstream_cache_last_modified(ngx_http_request_t *r,
+     ngx_http_variable_value_t *v, uintptr_t data);
+ #endif
+ 
++static ngx_str_t ngx_http_upstream_dynamic_server_null_route = ngx_string("127.255.255.255");
++
+ static void ngx_http_upstream_init_request(ngx_http_request_t *r);
+ static void ngx_http_upstream_resolve_handler(ngx_resolver_ctx_t *ctx);
+ static void ngx_http_upstream_rd_check_broken_connection(ngx_http_request_t *r);
+@@ -5191,7 +5193,24 @@ ngx_http_upstream_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+                                "%s in upstream \"%V\"", u.err, &u.url);
+         }
+ 
+-        return NGX_CONF_ERROR;
++        // If the domain fails to resolve on start up, mark this server as down,
++        // and assign a static IP that should never route. This is to account for
++        // various things inside nginx that seem to expect a server to always have
++        // at least 1 IP.
++        us->down = 1;
++
++        u.url = ngx_http_upstream_dynamic_server_null_route;
++        u.default_port = u.port;
++        u.no_resolve = 1;
++
++        if(ngx_parse_url(cf->pool, &u) != NGX_OK) {
++            if(u.err) {
++            ngx_conf_log_error(NGX_LOG_ERR, cf, 0,
++                "%s in upstream \"%V\"", u.err, &u.url);
++            }
++
++            return NGX_CONF_ERROR;
++        }
+     }
+ 
+     weight = 1;
