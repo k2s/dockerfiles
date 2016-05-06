@@ -4,7 +4,7 @@ if [ "$1" = "full" ]; then
     /xt/tools/_apt_install tar bzip2 zip p7zip unzip \
       mc less tmux nano vim heirloom-mailx \
       rsync wget curl dnsutils inetutils-ping telnet \
-      procps psmisc
+      procps psmisc ncdu
 else
     /xt/tools/_apt_install mc nano vim less procps
 fi

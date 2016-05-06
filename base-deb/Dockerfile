@@ -1,9 +1,10 @@
 #BUILD_METHOD=single
 #BUILD_PUSH=hub,quay
+#BUILD_PUSH_TAG_FROM=XT_CACHE_REBUILD
 FROM bigm/base-deb-minimal:latest
 
 # change to rebuild whole image
-ENV XT_CACHE_REBUILD 3
+ENV XT_CACHE_REBUILD 4
 
 # let the conatiner know that there is no tty
 ENV DEBIAN_FRONTEND noninteractive

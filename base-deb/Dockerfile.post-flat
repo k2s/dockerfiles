@@ -1,7 +1,7 @@
 FROM bigm/base-deb-flat
 
 # change to rebuild whole image
-ENV XT_CACHE_REBUILD 3
+ENV XT_CACHE_REBUILD 4
 
 # let the conatiner know that there is no tty
 ENV DEBIAN_FRONTEND noninteractive
