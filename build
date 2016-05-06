@@ -122,7 +122,7 @@ foreach ($cfg as $section => $def) {
                 $builder->setDefaultUser($v);
                 break;
             default:
-                DockerBuilder::info("ignoring key '$section'");
+                DockerBuilder::warn("ignoring key '$section'");
         }
     }
 }
@@ -170,7 +170,7 @@ if (array_key_exists('p', $opts)) {
 }
 
 
-DockerBuilder::info("done.");
+DockerBuilder::printAction("done.");
 
 
 /////////////////////////////////////////////////////////////
@@ -186,6 +186,7 @@ class DockerBuilder
     private $_readyToProcess = [];
     private $_forceBuild = false;
     private $_prefix = "";
+    public static $useColor = true;
 
     public static function factory($tempFolder = false)
     {
@@ -214,15 +215,34 @@ class DockerBuilder
         echo $string . PHP_EOL;
     }
 
+    public static function printAction($string = '')
+    {
+        $stars = str_repeat("*", strlen($string) + 19);
+        if (self::$useColor) {
+            DockerBuilder::printOut("\033[32m" . $stars);
+            DockerBuilder::printOut($string . "\033[0m" . PHP_EOL);
+        } else {
+            DockerBuilder::printOut($stars);
+            DockerBuilder::printOut($string . PHP_EOL);
+        }
+    }
 
     public static function warn($string)
     {
-        echo "W: $string" . PHP_EOL;
+        if (self::$useColor) {
+            echo "\033[36m" . "W: $string" . "\033[0m" . PHP_EOL;
+        } else {
+            echo "W: $string" . PHP_EOL;
+        }
     }
 
     public static function info($string)
     {
-        echo "I: $string" . PHP_EOL;
+        if (self::$useColor) {
+            echo "\033[34m" . "I: $string" . "\033[0m" . PHP_EOL;
+        } else {
+            echo "I: $string" . PHP_EOL;
+        }
     }
 
 
@@ -499,7 +519,7 @@ EOF;
 
     public function listImages()
     {
-        self::printOut("** image list");
+        self::printAction("** image list");
         foreach ($this->_getSanitizedList() as $imageName => $parent) {
             $sep = str_repeat(' ', 50 - strlen($imageName));
             if ($parent['p']) {
@@ -608,11 +628,7 @@ class DockerFile
         $folder = escapeshellarg($this->_folder . DIRECTORY_SEPARATOR);
         $nocache = $force ? '--no-cache' : '';
 
-        $stars = str_repeat("*", strlen($name) + 19);
-        DockerBuilder::printOut($stars);
-        DockerBuilder::printOut("* building $name image *");
-        DockerBuilder::printOut($stars);
-
+        DockerBuilder::printAction("building $name image");
 
         if (file_exists($this->_folder . '/Dockerfile.before.sh')) {
             $cwd = getcwd();
@@ -743,8 +759,8 @@ class DockerFile
                     $tags[] = $json;
                 }
                 foreach ($tags as $tag) {
-                    DockerBuilder::info("process repository tag '$tag'");
-                    $this->_exec("docker tag -f $name $targetName:$tag");
+                    DockerBuilder::printAction("process repository tag '$tag'");
+                    $this->_exec("docker tag $name $targetName:$tag");
                     $this->_exec("docker push $targetName:$tag");
                 }
             }
