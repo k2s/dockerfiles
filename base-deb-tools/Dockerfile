@@ -22,3 +22,10 @@ RUN /xt/tools/_apt_install zsh-static git \
     && git clone --recursive https://github.com/sorin-ionescu/prezto.git /root/.zprezto \
     && chsh -s /bin/zsh
 ADD root/ /
+
+# add termite terminfo
+RUN /xt/tools/_download /tmp/termite.terminfo https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo \
+    && tic /tmp/termite.terminfo \
+    && rm /tmp/termite.terminfo
+
+RUN /xt/tools/_apt_install ncdu
