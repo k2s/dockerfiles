@@ -5,17 +5,10 @@ FROM bigm/base-deb-tools
 # install icinga2
 RUN /xt/tools/_ppa_install ppa:formorer/icinga \
     apache2-utils php5-cli php5-mysql \
-    icinga2 icinga2-ido-mysql \
+    icinga2-common icinga2 icinga2-ido-mysql \
     icinga2-classicui \
     icingaweb2 icingaweb2-module-monitoring icingaweb2-module-doc \
     nagios-plugins nagios-plugins-contrib nagios-plugins-extra
-
-# syntax highlighting
-RUN echo '## Icinga 2' >> /etc/nanorc \
-    && echo 'include "/usr/share/icinga2-common/syntax/nano/icinga2.nanorc"' >> /etc/nanorc \
-    && mkdir /usr/share/vim/vimfiles/{syntax,ftdetect} \
-    && cp -a /usr/share/icinga2-common/syntax/vim/ftdetect/. /usr/share/vim/vimfiles/ftdetect/ \
-    && cp -a /usr/share/icinga2-common/syntax/vim/syntax/. /usr/share/vim/vimfiles/syntax/
 
 # create api certificates and users (will be overridden later)
 RUN icinga2 api setup
@@ -76,5 +69,15 @@ RUN mkdir -p /xt/defaults/etc \
     && cp -rp /etc/icinga2 /xt/defaults/etc/icinga2 \
     && cp -rp /etc/icingaweb2 /xt/defaults/etc/icingaweb2 \
     && cp -rp /etc/icinga2-classicui /xt/defaults/etc/icinga2-classicui
+
+# syntax highlighting
+#RUN echo '## Icinga 2' >> /etc/nanorc \
+#    && echo 'include "/usr/share/icinga2-common/syntax/nano/icinga2.nanorc"' >> /etc/nanorc \
+#    && mkdir /usr/share/vim/vimfiles/{syntax,ftdetect} \
+#    && cp -a /usr/share/icinga2-common/syntax/vim/ftdetect/. /usr/share/vim/vimfiles/ftdetect/ \
+#    && cp -a /usr/share/icinga2-common/syntax/vim/syntax/. /usr/share/vim/vimfiles/syntax/
+
+# HipChat notification support
+RUN pip install hipsaint
 
 # TODO graphite support
