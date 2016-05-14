@@ -12,3 +12,5 @@ ADD supervisor/* /etc/supervisord.d/
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
 RUN ln -sf /dev/stderr /var/log/nginx/error.log
+
+# TODO install goaccess to analyze access logs
