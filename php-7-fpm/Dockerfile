@@ -137,16 +137,6 @@ RUN	yes "" | pecl install mongodb \
 #	&& echo "extension=igbinary.so" > /usr/local/etc/php/conf.d/ext-igbinary.ini \
 #	&& echo "extension=memcached.so" > /usr/local/etc/php/conf.d/ext-memcached.ini
 
-RUN cd /tmp && git clone https://github.com/igbinary/igbinary7.git && cd /tmp/igbinary7 \
-    && phpize && ./configure CFLAGS="-O2 -g" --enable-igbinary && make && make install \
-    && rm -rf /tmp/igbinary7 \
-    && echo "extension=igbinary.so" > /usr/local/etc/php/conf.d/ext-igbinary.ini
-RUN /xt/tools/_apt_install libmemcached-dev \
-    && cd /tmp && git clone -b php7 https://github.com/php-memcached-dev/php-memcached && cd /tmp/php-memcached \
-    && phpize && ./configure --disable-memcached-sasl && make && make install \
-    && rm -rf /tmp/php-memcached \
-    && echo "extension=memcached.so" > /usr/local/etc/php/conf.d/ext-memcached.ini
-
 #RUN cd /tmp && /xt/tools/_download /tmp/apcu.tgz https://pecl.php.net/get/APCu \
 #    && cd /tmp && tar xf apcu.tgz && cd /tmp/apcu-5.1.3 \
 #	&& phpize && ./configure --enable-apcu --enable-apcu-bc && make && make install \
@@ -155,3 +145,19 @@ RUN yes "" | pecl install APCu-5.1.3 \
     && yes "" | pecl install apcu_bc-beta \
 	&& echo "extension=apcu.so" > /usr/local/etc/php/conf.d/ext-apcu.ini \
 	&& echo "extension=apc.so" >> /usr/local/etc/php/conf.d/ext-apcu.ini
+
+# we need msgpack until igbinary for PHP7 is not fixed https://github.com/igbinary/igbinary7/issues/3
+RUN yes "" | pecl install msgpack-beta \
+    && echo "extension=msgpack.so" > /usr/local/etc/php/conf.d/ext-msgpack.ini
+
+RUN cd /tmp && git clone https://github.com/igbinary/igbinary7.git && cd /tmp/igbinary7 \
+    && phpize && ./configure CFLAGS="-O2 -g" --enable-igbinary && make && make install \
+    && rm -rf /tmp/igbinary7 \
+    && echo "extension=igbinary.so" > /usr/local/etc/php/conf.d/ext-igbinary.ini
+RUN /xt/tools/_apt_install libmemcached-dev \
+    && cd /tmp && git clone -b php7 https://github.com/php-memcached-dev/php-memcached && cd /tmp/php-memcached \
+    && phpize && ./configure --enable-memcached-igbinary --disable-memcached-sasl && make && make install \
+    && rm -rf /tmp/php-memcached \
+    && echo "extension=memcached.so" > /usr/local/etc/php/conf.d/ext-memcached.ini
+
+RUN echo "session.serialize_handler=php" > /usr/local/etc/php/conf.d/zzzzzzzz.txt
