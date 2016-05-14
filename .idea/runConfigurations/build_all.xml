@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="build all" type="PhpLocalRunConfigurationType" factoryName="PHP Console" path="$PROJECT_DIR$/build">
+    <method />
+  </configuration>
+</component>
