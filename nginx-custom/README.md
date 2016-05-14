@@ -1,6 +1,6 @@
 # nginx-tengine
 
-Produces NGINX 1.8.0 with [nginx-upstream-dyanmic-servers](https://github.com/GUI/nginx-upstream-dyanmic-servers) module. 
+Produces NGINX 1.8.0 with [nginx-upstream-dyanmic-servers](https://github.com/k2s/nginx-upstream-dyanmic-servers) module. 
 
 ## Build
 
