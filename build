@@ -737,7 +737,7 @@ class DockerFile
     {
         foreach ($this->getTargetRepositories() as $alias) {
             $repo = DockerBuilder::getRepository($alias);
-            if (false === $repo) {
+            if (!$repo) {
                 DockerBuilder::warn("repository '$alias' unknown, skipping");
             } else {
                 // TODO $repo shuld be object and it should handle push steps
