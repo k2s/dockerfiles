@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if [ ! -f /xt/haraka/config/smtp.ini ]; then
+    echo "populate /xt/haraka/config"
+    cp -rp /xt/defaults/xt/haraka/config/. /xt/haraka/config
+fi
+
+# fix permissions
+#chown -R www-data:nagios /etc/icingaweb2/*
+chmod -R 777 /xt/haraka/config
