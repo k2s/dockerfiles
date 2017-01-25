@@ -744,6 +744,7 @@ class DockerFile
                 $name = escapeshellarg($this->_name);
                 $targetName = escapeshellarg(($repo ? $repo . DIRECTORY_SEPARATOR : '') . $this->_name);
                 $tags = ['latest'];
+                echo $targetName;
                 if ($this->_pushTagFrom) {
                     $json = "";
                     $this->_exec('docker inspect -f "{{ json .Config.Env }}" ' . $name, $json);

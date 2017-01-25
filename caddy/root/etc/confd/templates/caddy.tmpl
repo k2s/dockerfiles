@@ -1,0 +1,70 @@
+https://www.curo.sk, https://curo.sk {
+  proxy / 192.168.1.4:3000
+  #proxy / www.google.com 
+  gzip
+  log /root/logs/access.log {
+        rotate {
+            size 100 # Rotate after 100 MB
+            age  14  # Keep log files for 14 days
+            keep 10  # Keep at most 10 log files
+        }
+  }
+  errors {
+      log /root/logs/error.log {
+          size 50 # Rotate after 50 MB
+          age  30 # Keep rotated files for 30 days
+          keep 5  # Keep at most 5 log files
+      }
+  }
+}
+
+backend nomatch
+    errorfile 503 /etc/haproxy/errors/503.http
+
+#generated backends
+{{range $backend := lsdir "/backends"}}
+backend {{$backend}} {{/* TODO should be configurable by etcd */}}
+    balance leastconn
+    option httpclose
+    option forwardfor
+
+    ## http://blog.haproxy.com/2014/04/28/howto-write-apache-proxypass-rules-in-haproxy/
+    #reqrep ^([^\ :]*)\ /yt[/]?(.*)     \1\ /\2
+    #acl hdr_location res.hdr(Location) -m found
+    #rspirep ^Location: (https?://d.xtmotion.com(:[0-9]+)?)?(/.*) Location: /openfire if hdr_location
+
+    {{range $upstream := ls (printf "/backends/%s/upstreams" $backend)}}
+    server {{$upstream}} {{printf "/backends/%s/upstreams/%s" $backend $upstream | getv}} check
+    {{end}}
+    {{if exists (printf "/backends/%s/cookie_auth" $backend)}}
+    block if !{ path_beg /__aa } { req.cook_cnt(stageaccess) eq 0 }
+    {{end}}
+    {{if exists (printf "/backends/%s/block_robots" $backend)}}
+    rspadd X-Robots-Tag:\ noindex,\ nofollow
+    {{end}}
+    {{if exists (printf "/backends/%s/http_auth_userlist" $backend)}}
+    # protect backend with http_auth
+    acl authorized http_auth({{getv (printf "/backends/%s/http_auth_userlist" $backend)}})
+    http-request auth realm Authorization if !authorized
+    {{end}}
+{{end}}
+frontend http-in {{range gets "/domains/*"}}{{$d := json .Value}}{{$p := base .Key}}
+    # settings for domain key {{.Key}} {{if $d.backend}}{{if exists (printf "/backends/%s/enabled" $d.backend)}}
+    {{if $d.name}}acl {{$p}}_host hdr(host) -i {{$d.name}}{{end}}
+    {{if $d.port}}
+    acl {{$p}}_port dst_port {{$d.port}}
+    bind :{{$d.port}}
+    {{end}}
+    #{{if and ($d.url) (ne $d.url "/")}}acl {{$p}}_url path_beg {{$d.url}}{{end}}
+    #acl {{$p}}_health path_beg /ping
+    use_backend {{$d.backend}} if {{$p}}_host {{$p}}_port {{if and ($d.url) (ne $d.url "/")}}{ path_beg {{$d.url}} }{{end}}
+    #use_backend {{$d.backend}} if {{$p}}_health
+    {{else}}
+    # ERROR: backend {{$d.backend}} not enabled in /backends
+    {{end}}
+    {{else}}
+    # ERROR: backend value missing in {{.Key}}
+    {{end}}
+    # .settings for domain {{.Key}}
+    {{end}}
+# frontend https-in

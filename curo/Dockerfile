@@ -1,3 +1,4 @@
+#BUILD_PUSH=hub,quay
 FROM bigm/base-deb-tools
 
 #nodejs start
@@ -54,6 +55,11 @@ RUN /xt/tools/_apt_install make g++ xz-utils
 #    xz-utils \
 #    zlib1g-dev
 
+### mailing support
+RUN apt-get update && apt-get install -y libstdc++6 \
+	&& apt-get -y autoremove \
+	&& rm -rf /var/lib/apt/lists/*
+
 ENV NPM_CONFIG_LOGLEVEL info
 ENV NODE_VERSION 7.3.0
 
@@ -65,9 +71,12 @@ RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-
   && rm "node-v$NODE_VERSION-linux-x64.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt
 #nodejs end
 
-EXPOSE 3000
+EXPOSE 3000 3002
 
 # Create app directory
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+RUN mkdir -p /prj/src
+RUN mkdir -p /prj/tmp
+RUN mkdir -p /root/.curo
+RUN mkdir -p /root/.npm
+WORKDIR /prj/src
 CMD [ "npm", "start" ]
