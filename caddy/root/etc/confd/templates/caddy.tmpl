@@ -1,3 +1,4 @@
+#caddy conf file
 https://www.curo.sk, https://curo.sk {
   proxy / 192.168.1.4:3000
   #proxy / www.google.com 
@@ -17,6 +18,11 @@ https://www.curo.sk, https://curo.sk {
       }
   }
 }
+
+
+
+
+
 
 backend nomatch
     errorfile 503 /etc/haproxy/errors/503.http

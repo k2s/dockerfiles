@@ -39,7 +39,7 @@ RUN curl --silent --show-error --fail --location \
  
 
 EXPOSE 80 443 2015
-RUN mkdir -p /root/.caddy
-RUN mkdir -p /root/logs
+RUN mkdir -p /root/.caddy #certificates are stored here to avoind ban for overuse
+RUN mkdir -p /root/logs # probably wrong palce but want to to keep it all together
 
 CMD ["/usr/bin/caddy", "--conf", "/etc/Caddyfile", "--log", "stdout"]
