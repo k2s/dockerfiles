@@ -6,7 +6,9 @@
 http://{{$d.name}}, https://{{$d.name}} {
     # list backend: {{$d.backend}}
     {{range $upstream := ls (printf "/backends/%s/upstreams" $d.backend)}}
-    proxy / {{$upstream}}
+    proxy / {{$upstream}} {
+        websocket
+    }
     {{end}}
 
     gzip
