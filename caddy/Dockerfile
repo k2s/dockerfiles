@@ -28,18 +28,17 @@ RUN curl --silent --show-error --fail --location \
  
 # TODO update cond creation 
 # add caddy templates
-#ADD root/ /
+ADD root/ /
 # folders under /xt/defaults will be populated in instance if they are empty
-#RUN mkdir -p /xt/defaults/etc \
-#    && cp -rp /etc/confd /xt/defaults/etc/confd
+RUN mkdir -p /xt/defaults/etc \
+    && cp -rp /etc/confd /xt/defaults/etc/confd
  
 # final
-#ADD supervisor.d/* /etc/supervisord.d/
-#ADD startup/* /prj/startup/
- 
+ADD supervisor.d/* /etc/supervisord.d/
+ADD startup/* /prj/startup/
 
 EXPOSE 80 443 2015
 RUN mkdir -p /root/.caddy #certificates are stored here to avoind ban for overuse
 RUN mkdir -p /root/logs # probably wrong palce but want to to keep it all together
 
-CMD ["/usr/bin/caddy", "--conf", "/etc/Caddyfile", "--log", "stdout"]
+#CMD ["/usr/bin/caddy", "--conf", "/etc/Caddyfile", "--log", "stdout"]

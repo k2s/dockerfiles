@@ -10,6 +10,4 @@ mode = "0644"
 src = "caddy.tmpl"
 dest = "/etc/Caddyfile"
 
-# TODO just some thign changed from haproxy, none of if tested and won't work
-check_cmd = "/usr/bin/caddy -validate --conf /etc/Caddyfile -f {{ .src }} &>/tmp/check_haproxy"
-reload_cmd = "caddy -f /etc/Caddyfile -p /var/run/caddy.pid -D -sf $(cat /var/run/caddy.pid)"
+reload_cmd = "/usr/bin/killall -USR1 caddy"
