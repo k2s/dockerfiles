@@ -4,11 +4,20 @@
 # TODO test enabled
 
 http://{{$d.name}}, https://{{$d.name}} {
-    # list backend: {{$d.backend}}
-    {{range $upstream := ls (printf "/backends/%s/upstreams" $d.backend)}}
-    proxy / {{$upstream}} {
-        websocket
-    }
+
+    {{$maintenancePage := getv (printf "/backends/%s/maintenance" $d.backend)}}
+    {{if $maintenancePage}}
+        status 503 /
+        errors {
+            503 {{$maintenancePage}}
+        }
+    {{else}}
+        # list backend: {{$d.backend}}
+        {{range $upstream := ls (printf "/backends/%s/upstreams" $d.backend)}}
+        proxy / {{$upstream}} {
+            websocket
+        }
+        {{end}}
     {{end}}
 
     gzip
