@@ -51,6 +51,7 @@ RUN /xt/tools/php_compile_extension gd --with-png-dir=/usr --with-jpeg-dir=/usr 
 	&& /xt/tools/php_compile_extension ftp \
 	&& /xt/tools/php_compile_extension gettext \
 	&& /xt/tools/php_compile_extension mcrypt \
+	&& /xt/tools/php_compile_extension soap \
 	&& /xt/tools/php_compile_cleanup
 
 #sysvsem + sysvshm
